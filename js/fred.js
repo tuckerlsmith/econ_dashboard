@@ -3,7 +3,17 @@
  * Handles data fetching, caching, and rate limiting for the FRED API
  */
 
-const FRED_BASE_URL = 'https://api.stlouisfed.org/fred/series/observations';
+// FRED API base URL
+const FRED_API_BASE = 'https://api.stlouisfed.org/fred/series/observations';
+
+// CORS proxy for browser requests (FRED API doesn't send CORS headers)
+const CORS_PROXY = 'https://corsproxy.io/?';
+
+// Build the full URL with proxy
+function buildFredUrl(params) {
+    const fullUrl = `${FRED_API_BASE}?${params}`;
+    return CORS_PROXY + encodeURIComponent(fullUrl);
+}
 const CACHE_KEY = 'fred_data_cache';
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 const RATE_LIMIT_DELAY = 600; // 600ms between batches (to stay under 120 req/min)
@@ -25,13 +35,8 @@ export async function fetchSeries(seriesId, config, apiKey) {
         limit: config.limit || 365
     });
 
-    const response = await fetch(`${FRED_BASE_URL}?${params}`, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-            'Accept': 'application/json'
-        }
-    });
+    const url = buildFredUrl(params.toString());
+    const response = await fetch(url);
 
     if (!response.ok) {
         const errorText = await response.text();
