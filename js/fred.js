@@ -7,8 +7,8 @@
 const FRED_API_BASE = 'https://api.stlouisfed.org/fred/series/observations';
 
 // CORS proxy for browser requests (FRED API doesn't send CORS headers)
-// Using allorigins.win which works from production domains
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+// Cloudflare Worker proxy (deployed at dash.cloudflare.com)
+const CORS_PROXY = 'https://fred-proxy.tuckerlsmith.workers.dev/?url=';
 
 // Build the full URL with proxy
 function buildFredUrl(params) {
