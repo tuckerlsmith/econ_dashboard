@@ -533,24 +533,38 @@ function renderPanel5() {
         yieldsBody.innerHTML = COUNTRIES.map(country => {
             const yieldData = country.yieldSeries ? getSeriesData(country.yieldSeries) : null;
             const yieldValue = yieldData ? getLatestValue(yieldData) : null;
+
+            // MoM change (monthly data, so index 1 is previous month)
+            const prevYield = yieldData?.observations?.[1]?.value ?? null;
+            const momChange = (yieldValue !== null && prevYield !== null)
+                ? ((yieldValue - prevYield) * 100).toFixed(0)
+                : null;
+
+            // Spread vs US
             const usYieldData = getSeriesData('IRLTLT01USM156N');
             const usYield = usYieldData ? getLatestValue(usYieldData) : null;
             const spread = (yieldValue !== null && usYield !== null && country.id !== 'us')
                 ? ((usYield - yieldValue) * 100).toFixed(0)
+                : null;
+
+            // Format MoM with color
+            const momClass = momChange > 0 ? 'delta-up' : momChange < 0 ? 'delta-down' : '';
+            const momDisplay = momChange !== null
+                ? `<span class="${momClass}">${momChange > 0 ? '+' : ''}${momChange} bps</span>`
                 : '--';
 
             return `
                 <tr>
                     <td>
                         <div class="country-name">
-                            <span class="country-flag">${country.flag}</span>
+                            <span class="country-code">${country.id.toUpperCase()}</span>
                             ${country.name}
                         </div>
                     </td>
                     <td class="cell-value">${yieldValue !== null ? yieldValue.toFixed(2) + '%' : '--'}</td>
+                    <td class="cell-value">${momDisplay}</td>
+                    <td class="cell-value">${country.id === 'us' ? '--' : (spread !== null ? spread + ' bps' : '--')}</td>
                     <td class="cell-value">--</td>
-                    <td class="cell-value">${country.id === 'us' ? '--' : spread + ' bps'}</td>
-                    <td>--</td>
                     <td>
                         <a href="${country.investingUrl}" target="_blank" rel="noopener" class="link-icon">🔗</a>
                     </td>
@@ -559,29 +573,97 @@ function renderPanel5() {
         }).join('');
     }
 
-    // Currencies table
-    const currenciesBody = document.getElementById('currencies-matrix-body');
-    if (currenciesBody) {
-        currenciesBody.innerHTML = CURRENCIES.map(currency => {
-            const data = getSeriesData(currency.series);
-            const value = data ? getLatestValue(data) : null;
-
-            return `
-                <tr>
-                    <td class="cell-value">${currency.pair}</td>
-                    <td class="cell-value">${value !== null ? value.toFixed(4) : '--'}</td>
-                    <td class="cell-value">--</td>
-                    <td class="cell-value">--</td>
-                    <td>--</td>
-                </tr>
-            `;
-        }).join('');
-    }
+    // Currencies table with changes and sparklines
+    renderCurrenciesTable();
 
     // Spread cards
     renderSpreadCard('us-bund', 'IRLTLT01USM156N', 'IRLTLT01DEM156N');
     renderSpreadCard('bund-oat', 'IRLTLT01FRM156N', 'IRLTLT01DEM156N');
     renderSpreadCard('us-jgb', 'IRLTLT01USM156N', 'IRLTLT01JPM156N');
+
+    // Convergence chart
+    renderConvergenceChart();
+}
+
+function renderCurrenciesTable() {
+    const currenciesBody = document.getElementById('currencies-matrix-body');
+    if (!currenciesBody) return;
+
+    currenciesBody.innerHTML = CURRENCIES.map((currency, index) => {
+        const data = getSeriesData(currency.series);
+        const value = data ? getLatestValue(data) : null;
+
+        // 1-day change
+        const prevDay = data?.observations?.[1]?.value ?? null;
+        const dayChange = (value !== null && prevDay !== null)
+            ? ((value - prevDay) / prevDay * 100).toFixed(2)
+            : null;
+
+        // 1-month change (approx 22 trading days)
+        const prevMonth = data?.observations?.[22]?.value ?? null;
+        const monthChange = (value !== null && prevMonth !== null)
+            ? ((value - prevMonth) / prevMonth * 100).toFixed(2)
+            : null;
+
+        // Format changes with color
+        const dayClass = dayChange > 0 ? 'delta-up' : dayChange < 0 ? 'delta-down' : '';
+        const monthClass = monthChange > 0 ? 'delta-up' : monthChange < 0 ? 'delta-down' : '';
+
+        const dayDisplay = dayChange !== null
+            ? `<span class="${dayClass}">${dayChange > 0 ? '+' : ''}${dayChange}%</span>`
+            : '--';
+        const monthDisplay = monthChange !== null
+            ? `<span class="${monthClass}">${monthChange > 0 ? '+' : ''}${monthChange}%</span>`
+            : '--';
+
+        return `
+            <tr>
+                <td class="cell-value">${currency.pair}</td>
+                <td class="cell-value">${value !== null ? value.toFixed(4) : '--'}</td>
+                <td class="cell-value">${dayDisplay}</td>
+                <td class="cell-value">${monthDisplay}</td>
+                <td class="sparkline-cell"><canvas id="spark-fx-${index}" height="30"></canvas></td>
+            </tr>
+        `;
+    }).join('');
+
+    // Render FX sparklines after table is built
+    CURRENCIES.forEach((currency, index) => {
+        const data = getSeriesData(currency.series);
+        if (data) {
+            const sparklineData = getSparklineData(data, 90);
+            if (sparklineData.length > 0) {
+                createSparkline(`spark-fx-${index}`, sparklineData, {
+                    color: '#3b82f6',
+                    showEndpoint: true
+                });
+            }
+        }
+    });
+}
+
+function renderConvergenceChart() {
+    const convergenceData = COUNTRIES
+        .filter(c => c.yieldSeries) // Only countries with FRED data
+        .map(country => {
+            const data = getSeriesData(country.yieldSeries);
+            if (!data?.observations) return null;
+
+            // Get up to 12 months of data
+            const obs = data.observations.slice(0, 12).reverse();
+
+            return {
+                name: country.name,
+                color: country.color,
+                data: obs.map(o => o.value),
+                dates: obs.map(o => o.date)
+            };
+        })
+        .filter(Boolean);
+
+    if (convergenceData.length > 0) {
+        createConvergenceChart('chart-convergence', convergenceData);
+    }
 }
 
 // ============================================
