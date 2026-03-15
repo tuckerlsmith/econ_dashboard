@@ -333,15 +333,20 @@ function renderPanel2() {
 }
 
 function renderPanel3() {
-    // Sectoral matrix will be fully implemented in sectors.js (Phase 5)
+    // Sectoral matrix - signal derivation will be added in Phase 5 (sectors.js)
     const tbody = document.getElementById('sector-matrix-body');
     if (!tbody) return;
 
     tbody.innerHTML = SECTORS.map(sector => {
         const empData = getSeriesData(sector.employment);
         const wageData = getSeriesData(sector.wages);
+        const openingsData = sector.openings ? getSeriesData(sector.openings) : null;
+        const outputData = sector.output ? getSeriesData(sector.output) : null;
+
         const empValue = empData ? getLatestValue(empData) : null;
         const wageValue = wageData ? getLatestValue(wageData) : null;
+        const openingsValue = openingsData ? getLatestValue(openingsData) : null;
+        const outputValue = outputData ? getLatestValue(outputData) : null;
 
         return `
             <tr>
@@ -353,8 +358,8 @@ function renderPanel3() {
                 </td>
                 <td class="cell-value">${empValue ? formatNumber(empValue, 0) : '--'}</td>
                 <td class="cell-value">${wageValue ? '$' + formatNumber(wageValue, 0) : '--'}</td>
-                <td class="cell-value">--</td>
-                <td class="cell-value">--</td>
+                <td class="cell-value">${openingsValue ? formatNumber(openingsValue, 0) : '--'}</td>
+                <td class="cell-value">${outputValue ? formatNumber(outputValue, 1) : '--'}</td>
                 <td>--</td>
             </tr>
         `;
