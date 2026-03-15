@@ -313,14 +313,14 @@ function renderPanel1() {
 }
 
 function renderPanel2() {
-    renderMetricCard('hy-oas', 'BAMLH0A0HYM2', { suffix: ' bps', decimals: 0 });
+    renderMetricCard('hy-oas', 'BAMLH0A0HYM2', { suffix: ' bps', decimals: 0, multiply: 100 });
     renderMetricCard('yield-curve', 'T10Y2Y', { suffix: ' bps', decimals: 0, multiply: 100 });
 
-    // Apply HY OAS threshold coloring
+    // Apply HY OAS threshold coloring (multiply by 100 since data is in %, thresholds are in bps)
     const hyOasValue = getLatestValue(getSeriesData('BAMLH0A0HYM2'));
     if (hyOasValue !== null) {
         const hyOasCard = document.getElementById('metric-hy-oas');
-        const thresholdClass = getThresholdClass(hyOasValue, THRESHOLDS.hyOas);
+        const thresholdClass = getThresholdClass(hyOasValue * 100, THRESHOLDS.hyOas);
         hyOasCard.className = `metric-card ${thresholdClass}`;
     }
 
@@ -363,8 +363,8 @@ function renderPanel3() {
 
 function renderPanel4() {
     renderMetricCard('cpi-shelter', 'CUSR0000SAH1', { decimals: 1 });
-    renderMetricCard('cpi-medical', 'CUSR0000SAM', { decimals: 1 });
-    renderMetricCard('cpi-energy', 'CUSR0000SA0E', { decimals: 1 });
+    renderMetricCard('cpi-medical', 'CPIMEDSL', { decimals: 1 });
+    renderMetricCard('cpi-energy', 'CPIENGSL', { decimals: 1 });
 }
 
 function renderPanel5() {
@@ -517,14 +517,15 @@ function updateBottomBar() {
     // DXY
     updateBottomMetric('bb-dxy', 'DTWEXBGS', '');
 
-    // HY OAS
+    // HY OAS (data is in %, display in bps)
     const hyOasEl = document.getElementById('bb-hy-oas');
     const hyOasData = getSeriesData('BAMLH0A0HYM2');
     if (hyOasData && hyOasEl) {
         const value = getLatestValue(hyOasData);
         const change = getChange(hyOasData);
+        const valueBps = value !== null ? value * 100 : null;
 
-        hyOasEl.querySelector('.value').textContent = value ? value.toFixed(0) : '--';
+        hyOasEl.querySelector('.value').textContent = valueBps ? valueBps.toFixed(0) : '--';
 
         const arrowEl = hyOasEl.querySelector('.arrow');
         if (change !== null) {
@@ -532,9 +533,9 @@ function updateBottomBar() {
             arrowEl.className = `arrow ${change >= 0 ? 'up' : 'down'}`;
         }
 
-        // Apply threshold color
-        if (value !== null) {
-            const thresholdClass = getThresholdClass(value, THRESHOLDS.hyOas);
+        // Apply threshold color (valueBps is already in bps)
+        if (valueBps !== null) {
+            const thresholdClass = getThresholdClass(valueBps, THRESHOLDS.hyOas);
             hyOasEl.className = `bottom-metric ${thresholdClass}`;
         }
     }
