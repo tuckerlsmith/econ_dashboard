@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>American Antifragility Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Error Banner -->
+    <div id="error-banner" class="error-banner"></div>
+
+    <!-- API Key Modal -->
+    <div id="api-key-modal" class="modal">
+        <div class="modal-content">
+            <h2>FRED API Key Required</h2>
+            <p>This dashboard fetches data from the Federal Reserve Economic Data (FRED) API. You'll need a free API key to continue.</p>
+            <ol>
+                <li>Register at <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank" rel="noopener">fred.stlouisfed.org</a></li>
+                <li>Copy your API key</li>
+                <li>Paste it below</li>
+            </ol>
+            <form id="api-key-form">
+                <input type="text" id="api-key-input" placeholder="Enter your FRED API key" autocomplete="off" required>
+                <button type="submit">Save & Load Dashboard</button>
+            </form>
+            <p class="modal-note">Your key is stored locally in your browser and never sent to any server except FRED.</p>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2>Settings & Manual Data Entry</h2>
+                <button class="modal-close" id="settings-close">&times;</button>
+            </div>
+            <div id="settings-content">
+                <!-- Populated by settings.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">American Antifragility Monitor</h1>
+            <div class="header-controls">
+                <button id="refresh-btn" class="btn-icon" title="Refresh data">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                </button>
+                <button id="settings-btn" class="btn-icon" title="Settings">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+                <span id="last-updated" class="last-updated"></span>
+            </div>
+        </header>
+
+        <!-- Group A: Dollar & Credit -->
+        <section class="panel-group" id="group-a" data-group="a">
+            <div class="group-header" role="button" tabindex="0">
+                <span class="group-toggle">&#9662;</span>
+                <span class="group-title">Dollar & Credit</span>
+                <span class="group-summary" id="group-a-summary"></span>
+            </div>
+            <div class="group-content">
+                <!-- Panel 1: Dollar Regime Diagnostic -->
+                <div class="panel panel-full" id="panel-1">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            Dollar Regime Diagnostic
+                            <span class="info-icon" data-explainer="regime-classifier" role="button" tabindex="0">i</span>
+                        </h2>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Regime Badge -->
+                        <div class="regime-badge regime-indeterminate" id="regime-badge">
+                            <span class="regime-number">--</span>
+                            <span class="regime-name">Loading...</span>
+                            <span class="regime-duration"></span>
+                        </div>
+
+                        <!-- Metrics Row -->
+                        <div class="metric-row">
+                            <div class="metric-card" id="metric-dgs10">
+                                <div class="metric-label">US 10Y Yield</div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-dgs10"></canvas>
+                                </div>
+                            </div>
+                            <div class="metric-card" id="metric-dxy">
+                                <div class="metric-label">Dollar Index (DXY)</div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-dxy"></canvas>
+                                </div>
+                            </div>
+                            <div class="metric-card" id="metric-correlation">
+                                <div class="metric-label">
+                                    60-Day Correlation
+                                    <span class="info-icon" data-explainer="correlation" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                            </div>
+                            <div class="metric-card" id="metric-term-premium">
+                                <div class="metric-label">
+                                    Term Premium
+                                    <span class="info-icon" data-explainer="term-premium" role="button" tabindex="0">i</span>
+                                    <span class="badge-manual">Manual</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                            </div>
+                            <div class="metric-card" id="metric-5y5y">
+                                <div class="metric-label">
+                                    5Y5Y Forward
+                                    <span class="info-icon" data-explainer="5y5y-forward" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-5y5y"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row -->
+                        <div class="chart-row">
+                            <div class="chart-container" id="correlation-chart-container">
+                                <div class="chart-title">Rolling Correlation (180 days)</div>
+                                <canvas id="chart-correlation"></canvas>
+                            </div>
+                            <div class="chart-container" id="overlay-chart-container">
+                                <div class="chart-title">Yield vs Dollar (90 days)</div>
+                                <canvas id="chart-yield-dollar"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Domestic Credit & Credibility -->
+                <div class="panel" id="panel-2">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            Domestic Credit & Credibility
+                            <span class="info-icon" data-explainer="credit-credibility" role="button" tabindex="0">i</span>
+                        </h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="metric-row">
+                            <div class="metric-card" id="metric-hy-oas">
+                                <div class="metric-label">
+                                    HY OAS
+                                    <span class="info-icon" data-explainer="hy-oas" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-hy-oas"></canvas>
+                                </div>
+                            </div>
+                            <div class="metric-card" id="metric-yield-curve">
+                                <div class="metric-label">
+                                    Yield Curve (10Y-2Y)
+                                    <span class="info-icon" data-explainer="yield-curve" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-yield-curve"></canvas>
+                                </div>
+                            </div>
+                            <div class="metric-card" id="metric-deficit-gdp">
+                                <div class="metric-label">
+                                    Deficit/GDP
+                                    <span class="info-icon" data-explainer="deficit-gdp" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-deficit"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Group B: Domestic Structure -->
+        <section class="panel-group" id="group-b" data-group="b">
+            <div class="group-header" role="button" tabindex="0">
+                <span class="group-toggle">&#9662;</span>
+                <span class="group-title">Domestic Structure</span>
+                <span class="group-summary" id="group-b-summary"></span>
+            </div>
+            <div class="group-content">
+                <!-- Panel 3: Sectoral Comparison Matrix -->
+                <div class="panel panel-full" id="panel-3">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            Sectoral Comparison Matrix
+                            <span class="info-icon" data-explainer="sector-matrix" role="button" tabindex="0">i</span>
+                        </h2>
+                        <div class="panel-meta">
+                            <span class="update-badge"><span class="dot"></span> Monthly</span>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="matrix-wrapper">
+                            <table class="matrix" id="sector-matrix">
+                                <thead>
+                                    <tr>
+                                        <th>Sector</th>
+                                        <th>Employment <span class="info-icon" data-explainer="employment" role="button" tabindex="0">i</span></th>
+                                        <th>Avg Weekly Wage <span class="info-icon" data-explainer="wages" role="button" tabindex="0">i</span></th>
+                                        <th>Openings <span class="info-icon" data-explainer="openings" role="button" tabindex="0">i</span></th>
+                                        <th>Output <span class="info-icon" data-explainer="output" role="button" tabindex="0">i</span></th>
+                                        <th>Signal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sector-matrix-body">
+                                    <!-- Populated by sectors.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="matrix-summary" id="sector-summary">
+                            <!-- Populated by sectors.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 4: Domestic Expenses -->
+                <div class="panel" id="panel-4">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            Domestic Expenses
+                            <span class="info-icon" data-explainer="domestic-expenses" role="button" tabindex="0">i</span>
+                        </h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="metric-row">
+                            <div class="metric-card" id="metric-cpi-shelter">
+                                <div class="metric-label">
+                                    Shelter CPI
+                                    <span class="info-icon" data-explainer="cpi-shelter" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-cpi-shelter"></canvas>
+                                </div>
+                            </div>
+                            <div class="metric-card" id="metric-cpi-medical">
+                                <div class="metric-label">
+                                    Medical Care CPI
+                                    <span class="info-icon" data-explainer="cpi-medical" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-cpi-medical"></canvas>
+                                </div>
+                            </div>
+                            <div class="metric-card" id="metric-cpi-energy">
+                                <div class="metric-label">
+                                    Energy CPI
+                                    <span class="info-icon" data-explainer="cpi-energy" role="button" tabindex="0">i</span>
+                                </div>
+                                <div class="metric-value">--</div>
+                                <div class="metric-delta">--</div>
+                                <div class="sparkline-container">
+                                    <canvas id="spark-cpi-energy"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Group C: International -->
+        <section class="panel-group" id="group-c" data-group="c">
+            <div class="group-header" role="button" tabindex="0">
+                <span class="group-toggle">&#9662;</span>
+                <span class="group-title">International Comparison</span>
+                <span class="group-summary" id="group-c-summary"></span>
+            </div>
+            <div class="group-content">
+                <!-- Tab Navigation for Panel 5 and Explainer Tabs -->
+                <div class="panel-tabs">
+                    <button class="panel-tab active" data-tab="yields-currencies">Yields & Currencies</button>
+                    <button class="panel-tab" data-tab="bond-explainer">Bond Explainer</button>
+                    <button class="panel-tab" data-tab="energy-explainer">Energy Explainer</button>
+                </div>
+
+                <!-- Panel 5: Yields & Currencies (Tab Content) -->
+                <div class="tab-content active" id="tab-yields-currencies">
+                    <div class="panel panel-full" id="panel-5">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Comparative Sovereign Yields & Currencies</h2>
+                            <div class="panel-meta">
+                                <span class="update-badge"><span class="dot"></span> Yields: Monthly</span>
+                                <span class="update-badge"><span class="dot dot-daily"></span> FX: Daily</span>
+                            </div>
+                        </div>
+                        <div class="panel-content">
+                            <!-- Sovereign Yields Table -->
+                            <div class="sub-section">
+                                <h3 class="sub-title">Sovereign 10Y Yields</h3>
+                                <div class="matrix-wrapper">
+                                    <table class="matrix" id="yields-matrix">
+                                        <thead>
+                                            <tr>
+                                                <th>Country</th>
+                                                <th>10Y Yield</th>
+                                                <th>Chg (MoM)</th>
+                                                <th>Spread vs US</th>
+                                                <th>Trend</th>
+                                                <th>Daily</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="yields-matrix-body">
+                                            <!-- Populated by app.js -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Key Spreads -->
+                            <div class="sub-section">
+                                <h3 class="sub-title">Key Spreads (bps)</h3>
+                                <div class="metric-row">
+                                    <div class="metric-card" id="metric-us-bund">
+                                        <div class="metric-label">
+                                            US-Bund
+                                            <span class="info-icon" data-explainer="us-bund" role="button" tabindex="0">i</span>
+                                        </div>
+                                        <div class="metric-value">--</div>
+                                        <div class="metric-delta">--</div>
+                                        <div class="sparkline-container">
+                                            <canvas id="spark-us-bund"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="metric-card" id="metric-bund-oat">
+                                        <div class="metric-label">
+                                            Bund-OAT
+                                            <span class="info-icon" data-explainer="bund-oat" role="button" tabindex="0">i</span>
+                                        </div>
+                                        <div class="metric-value">--</div>
+                                        <div class="metric-delta">--</div>
+                                        <div class="sparkline-container">
+                                            <canvas id="spark-bund-oat"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="metric-card" id="metric-us-jgb">
+                                        <div class="metric-label">
+                                            US-JGB
+                                            <span class="info-icon" data-explainer="us-jgb" role="button" tabindex="0">i</span>
+                                        </div>
+                                        <div class="metric-value">--</div>
+                                        <div class="metric-delta">--</div>
+                                        <div class="sparkline-container">
+                                            <canvas id="spark-us-jgb"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Convergence Chart -->
+                            <div class="sub-section">
+                                <h3 class="sub-title">
+                                    Yield Convergence/Divergence
+                                    <span class="info-icon" data-explainer="convergence" role="button" tabindex="0">i</span>
+                                </h3>
+                                <div class="chart-container chart-wide">
+                                    <canvas id="chart-convergence"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Currencies Table -->
+                            <div class="sub-section">
+                                <h3 class="sub-title">Exchange Rates</h3>
+                                <div class="matrix-wrapper">
+                                    <table class="matrix" id="currencies-matrix">
+                                        <thead>
+                                            <tr>
+                                                <th>Pair</th>
+                                                <th>Rate</th>
+                                                <th>1D Chg</th>
+                                                <th>1M Chg</th>
+                                                <th>90D Trend</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="currencies-matrix-body">
+                                            <!-- Populated by app.js -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bond Explainer Tab Content -->
+                <div class="tab-content" id="tab-bond-explainer">
+                    <div class="explainer-panel" id="bond-explainer-content">
+                        <!-- Populated by explainers.js -->
+                    </div>
+                </div>
+
+                <!-- Energy Explainer Tab Content -->
+                <div class="tab-content" id="tab-energy-explainer">
+                    <div class="explainer-panel" id="energy-explainer-content">
+                        <!-- Populated by explainers.js -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Persistent Bottom Bar -->
+    <footer class="bottom-bar" id="bottom-bar">
+        <div class="regime-mini regime-indeterminate" id="bb-regime">
+            <span class="regime-number">--</span>
+        </div>
+        <div class="bottom-metric" id="bb-10y">
+            <span class="label">10Y</span>
+            <span class="value">--</span>
+            <span class="arrow">--</span>
+        </div>
+        <div class="bottom-metric" id="bb-dxy">
+            <span class="label">DXY</span>
+            <span class="value">--</span>
+            <span class="arrow">--</span>
+        </div>
+        <div class="bottom-metric" id="bb-hy-oas">
+            <span class="label">HY OAS</span>
+            <span class="value">--</span>
+            <span class="arrow">--</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

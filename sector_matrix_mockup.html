@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sectoral Comparison Matrix — Dashboard Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-panel: #111827;
+  --bg-cell: #1a2235;
+  --bg-hover: #1e2a42;
+  --border: #2a3550;
+  --text-primary: #e2e8f0;
+  --text-secondary: #8892a8;
+  --text-dim: #5a6478;
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,0.08);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.08);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.08);
+  --blue: #3b82f6;
+  --cyan: #06b6d4;
+
+  /* Sector accent colors */
+  --healthcare: #f472b6;
+  --profserv: #818cf8;
+  --infotech: #06b6d4;
+  --manufacturing: #f59e0b;
+  --construction: #22c55e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+.panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.update-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 4px;
+  color: var(--blue);
+  font-size: 10px;
+}
+
+.update-badge .dot {
+  width: 5px; height: 5px;
+  background: var(--blue);
+  border-radius: 50%;
+}
+
+/* Matrix grid */
+.matrix-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.matrix {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.matrix th, .matrix td {
+  padding: 10px 14px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.matrix th {
+  background: var(--bg-cell);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.matrix th:first-child,
+.matrix td:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--bg-panel);
+}
+
+.matrix th:first-child {
+  background: var(--bg-cell);
+  z-index: 4;
+}
+
+.matrix tbody tr:hover td {
+  background: var(--bg-hover);
+}
+
+.matrix tbody tr:hover td:first-child {
+  background: var(--bg-hover);
+}
+
+/* Sector name cells */
+.sector-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.sector-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Value styling */
+.value-cell {
+  position: relative;
+}
+
+.value-main {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.value-delta {
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.delta-up { color: var(--green); }
+.delta-down { color: var(--red); }
+.delta-flat { color: var(--text-dim); }
+
+/* Divergence flag */
+.flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.flag-warn {
+  color: var(--amber);
+  background: var(--amber-bg);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+
+.flag-alert {
+  color: var(--red);
+  background: var(--red-bg);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+.flag-good {
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+
+/* Info icon */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'IBM Plex Sans', sans-serif;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.info-icon:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(59,130,246,0.1);
+}
+
+/* Tooltip */
+.tooltip-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: -20px;
+  width: 320px;
+  background: #1e293b;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 100;
+}
+
+.tooltip-content .tooltip-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.tooltip-content .tooltip-signal {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.tooltip-wrap:hover .tooltip-content,
+.tooltip-wrap.active .tooltip-content {
+  display: block;
+}
+
+/* Column group headers */
+.col-group-header th {
+  border-bottom: 2px solid var(--border);
+  font-size: 9px;
+  padding: 6px 14px;
+  color: var(--text-dim);
+}
+
+/* Divergence row */
+.divergence-row td {
+  background: rgba(245,158,11,0.03);
+  border-top: 2px solid var(--border);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 8px 14px;
+}
+
+/* Summary bar beneath table */
+.matrix-summary {
+  display: flex;
+  gap: 16px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-cell);
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.summary-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* Frequency badge legend */
+.freq-legend {
+  display: flex;
+  gap: 12px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.freq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim);
+}
+
+.freq-badge .freq-dot {
+  width: 6px; height: 6px;
+  border-radius: 2px;
+}
+
+.freq-m { background: var(--blue); }
+.freq-q { background: var(--cyan); }
+.freq-a { background: var(--text-dim); }
+
+/* ---- MOBILE ---- */
+@media (max-width: 768px) {
+  body { padding: 8px; }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .matrix th, .matrix td {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .value-main { font-size: 12px; }
+  .sector-name { font-size: 12px; }
+
+  .matrix-summary {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .tooltip-content {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+}
+
+/* Context note */
+.context-note {
+  padding: 12px 20px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      Sectoral Comparison Matrix
+      <span class="tooltip-wrap">
+        <span class="info-icon" onclick="this.parentElement.classList.toggle('active')">i</span>
+        <div class="tooltip-content">
+          <div class="tooltip-title">Sectoral Comparison Matrix</div>
+          This panel tracks the structural mismatch between where economic value accrues and where employment concentrates. The framework identifies this divergence as a core symptom of domestic governance failure: an economy where earnings concentrate in tech while jobs grow primarily in cost-inflated healthcare indicates structural misalignment, not healthy specialization.
+          <div class="tooltip-signal">
+            <strong>What to watch:</strong> Employment growing while productivity stagnates (healthcare pathology). Output growing while employment declines (automation pattern). Unfilled openings rising while wages stagnate (skills mismatch).
+          </div>
+        </div>
+      </span>
+    </div>
+    <div class="panel-meta">
+      <div class="update-badge">
+        <span class="dot"></span>
+        Updated Feb 2026
+      </div>
+      <span>Next: ~Apr 7 (BLS)</span>
+    </div>
+  </div>
+
+  <div class="matrix-wrapper">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th style="min-width:160px">Sector</th>
+          <th>
+            Employment
+            <span class="tooltip-wrap">
+              <span class="info-icon" onclick="this.parentElement.classList.toggle('active')">i</span>
+              <div class="tooltip-content">
+                <div class="tooltip-title">Employment (CES, Monthly)</div>
+                All employees by sector from BLS Current Employment Statistics. Monthly, seasonally adjusted, in thousands. Delta shows 12-month change.
+              </div>
+            </span>
+          </th>
+          <th>
+            Avg Weekly Wage
+            <span class="tooltip-wrap">
+              <span class="info-icon" onclick="this.parentElement.classList.toggle('active')">i</span>
+              <div class="tooltip-content">
+                <div class="tooltip-title">Average Weekly Wages (QCEW, Quarterly)</div>
+                BLS Quarterly Census of Employment and Wages. Lags by ~6 months. Used as a proxy for median wages, which are only available annually. Watch for sectors where wages stagnate despite openings — a structural skills mismatch signal.
+              </div>
+            </span>
+          </th>
+          <th>
+            Openings
+            <span class="tooltip-wrap">
+              <span class="info-icon" onclick="this.parentElement.classList.toggle('active')">i</span>
+              <div class="tooltip-content">
+                <div class="tooltip-title">Job Openings (JOLTS, Monthly)</div>
+                Unfilled positions by sector from JOLTS. Monthly, in thousands, ~2 month lag. Rising openings with stagnant employment = skills mismatch. Rising openings with rising wages = genuine labor scarcity.
+              </div>
+            </span>
+          </th>
+          <th>
+            Output Index
+            <span class="tooltip-wrap">
+              <span class="info-icon" onclick="this.parentElement.classList.toggle('active')">i</span>
+              <div class="tooltip-content">
+                <div class="tooltip-title">Output / Production Index</div>
+                Industrial Production for manufacturing (monthly, FRED). BEA value-added for services sectors (quarterly). Differing frequencies noted per sector. Output growing faster than employment = productivity gains or automation.
+              </div>
+            </span>
+          </th>
+          <th>Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Healthcare -->
+        <tr>
+          <td>
+            <div class="sector-name">
+              <span class="sector-dot" style="background:var(--healthcare)"></span>
+              Healthcare
+            </div>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">17,284</span>
+            <span class="value-delta delta-up">▲ +312K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">$1,148</span>
+            <span class="value-delta delta-up">▲ 2.1%</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">1,820</span>
+            <span class="value-delta delta-up">▲ +95K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">—</span>
+            <span class="value-delta delta-flat">Q</span>
+          </td>
+          <td>
+            <span class="flag flag-warn">⚠ Cost Pathology</span>
+          </td>
+        </tr>
+
+        <!-- Professional/Business Services -->
+        <tr>
+          <td>
+            <div class="sector-name">
+              <span class="sector-dot" style="background:var(--profserv)"></span>
+              Prof & Business Svcs
+            </div>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">23,142</span>
+            <span class="value-delta delta-down">▼ −87K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">$1,586</span>
+            <span class="value-delta delta-up">▲ 3.4%</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">1,340</span>
+            <span class="value-delta delta-down">▼ −120K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">—</span>
+            <span class="value-delta delta-flat">Q</span>
+          </td>
+          <td>
+            <span class="flag flag-alert">AI Displacement</span>
+          </td>
+        </tr>
+
+        <!-- Information Technology -->
+        <tr>
+          <td>
+            <div class="sector-name">
+              <span class="sector-dot" style="background:var(--infotech)"></span>
+              Information
+            </div>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">3,042</span>
+            <span class="value-delta delta-down">▼ −24K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">$2,480</span>
+            <span class="value-delta delta-up">▲ 4.8%</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">215</span>
+            <span class="value-delta delta-flat">— flat</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">118.4</span>
+            <span class="value-delta delta-up">▲ 6.2%</span>
+          </td>
+          <td>
+            <span class="flag flag-warn">Earnings Concentration</span>
+          </td>
+        </tr>
+
+        <!-- Manufacturing -->
+        <tr>
+          <td>
+            <div class="sector-name">
+              <span class="sector-dot" style="background:var(--manufacturing)"></span>
+              Manufacturing
+            </div>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">12,748</span>
+            <span class="value-delta delta-down">▼ −42K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">$1,310</span>
+            <span class="value-delta delta-up">▲ 2.8%</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">580</span>
+            <span class="value-delta delta-up">▲ +35K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">102.1</span>
+            <span class="value-delta delta-flat">▲ 0.4%</span>
+          </td>
+          <td>
+            <span class="flag flag-warn">Skills Gap</span>
+          </td>
+        </tr>
+
+        <!-- Construction -->
+        <tr>
+          <td>
+            <div class="sector-name">
+              <span class="sector-dot" style="background:var(--construction)"></span>
+              Construction
+            </div>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">8,210</span>
+            <span class="value-delta delta-up">▲ +68K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">$1,420</span>
+            <span class="value-delta delta-up">▲ 3.1%</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">420</span>
+            <span class="value-delta delta-up">▲ +22K</span>
+          </td>
+          <td class="value-cell">
+            <span class="value-main">—</span>
+            <span class="value-delta delta-flat">Q</span>
+          </td>
+          <td>
+            <span class="flag flag-good">Supply Capacity</span>
+          </td>
+        </tr>
+
+        <!-- Divergence summary row -->
+        <tr class="divergence-row">
+          <td colspan="6" style="text-align:left;">
+            <strong style="color:var(--amber);">Divergence:</strong>
+            Healthcare employment ▲ +1.8% YoY while productivity flat — cost pathology deepening.
+            Information output ▲ 6.2% while employment ▼ — value accruing without job creation.
+            Manufacturing openings ▲ while employment ▼ — skills mismatch / defense industrial base gap.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="matrix-summary">
+    <div class="summary-card">
+      <div class="summary-label">Top Employment Growth</div>
+      <div class="summary-value" style="color:var(--healthcare)">Healthcare +312K (+1.8%)</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Top Wage Growth</div>
+      <div class="summary-value" style="color:var(--infotech)">Information +4.8% YoY</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Largest Skills Gap</div>
+      <div class="summary-value" style="color:var(--manufacturing)">Manufacturing: 580K openings, −42K employed</div>
+    </div>
+  </div>
+
+  <div class="freq-legend">
+    <span class="freq-badge"><span class="freq-dot freq-m"></span> Monthly (CES, JOLTS, IP)</span>
+    <span class="freq-badge"><span class="freq-dot freq-q"></span> Quarterly (QCEW wages, BEA output)</span>
+    <span class="freq-badge"><span class="freq-dot freq-a"></span> Annual (OEWS median wages)</span>
+  </div>
+
+  <div class="context-note">
+    Data is illustrative (sample values for layout purposes). Connects to: SA_US_Domestic_Governance (workforce mismatch), MB_Structural_Economic_Transitions (earnings-employment divergence), MB_Affordability_Workforce_Conditions (sectoral employment trends), ASS_Abundance_Affordability (construction supply capacity).
+  </div>
+</div>
+
+</body>
+</html>
