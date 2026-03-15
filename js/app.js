@@ -647,7 +647,10 @@ function renderConvergenceChart() {
         .filter(c => c.yieldSeries) // Only countries with FRED data
         .map(country => {
             const data = getSeriesData(country.yieldSeries);
-            if (!data?.observations) return null;
+            if (!data?.observations) {
+                console.log(`No data for ${country.name} (${country.yieldSeries})`);
+                return null;
+            }
 
             // Get up to 12 months of data
             const obs = data.observations.slice(0, 12).reverse();
@@ -661,8 +664,12 @@ function renderConvergenceChart() {
         })
         .filter(Boolean);
 
+    console.log('Convergence chart data:', convergenceData.length, 'countries');
+
     if (convergenceData.length > 0) {
         createConvergenceChart('chart-convergence', convergenceData);
+    } else {
+        console.warn('No convergence data available');
     }
 }
 
@@ -722,9 +729,12 @@ function renderSpreadCard(id, series1, series2) {
     const data1 = getSeriesData(series1);
     const data2 = getSeriesData(series2);
 
+    const valueEl = card.querySelector('.metric-value');
+    const deltaEl = card.querySelector('.metric-delta');
+
     if (!data1 || !data2) {
-        card.querySelector('.metric-value').textContent = '--';
-        card.querySelector('.metric-delta').textContent = '--';
+        valueEl.textContent = '--';
+        if (deltaEl) deltaEl.textContent = '';
         return;
     }
 
@@ -732,12 +742,26 @@ function renderSpreadCard(id, series1, series2) {
     const value2 = getLatestValue(data2);
 
     if (value1 === null || value2 === null) {
-        card.querySelector('.metric-value').textContent = '--';
+        valueEl.textContent = '--';
+        if (deltaEl) deltaEl.textContent = '';
         return;
     }
 
     const spread = (value1 - value2) * 100; // Convert to bps
-    card.querySelector('.metric-value').textContent = spread.toFixed(0) + ' bps';
+    valueEl.textContent = spread.toFixed(0) + ' bps';
+
+    // Calculate MoM change in spread
+    const prev1 = data1.observations?.[1]?.value;
+    const prev2 = data2.observations?.[1]?.value;
+
+    if (prev1 !== undefined && prev2 !== undefined && deltaEl) {
+        const prevSpread = (prev1 - prev2) * 100;
+        const change = spread - prevSpread;
+        const changeClass = change > 0 ? 'delta-up' : change < 0 ? 'delta-down' : '';
+        deltaEl.innerHTML = `<span class="${changeClass}">${change > 0 ? '+' : ''}${change.toFixed(0)} bps MoM</span>`;
+    } else if (deltaEl) {
+        deltaEl.textContent = '';
+    }
 }
 
 // ============================================
