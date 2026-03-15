@@ -28,7 +28,8 @@ import { calculateRegime as calcRegime } from './calculations.js';
 import {
     createSparkline,
     createCorrelationChart,
-    createYieldDollarChart
+    createYieldDollarChart,
+    createConvergenceChart
 } from './charts.js';
 
 // ============================================
