@@ -503,11 +503,13 @@ function renderPanel3() {
     );
 
     tbody.innerHTML = sectorMetrics.map(metrics => {
-        const { sector, employment, employmentYoY, wages, wagesYoY, openings, output, signal } = metrics;
+        const { sector, employment, employmentYoY, wages, wagesYoY, openings, openingsYoY, output, outputYoY, signal } = metrics;
 
         // Format YoY values
         const empYoYFormatted = formatYoY(employmentYoY);
         const wageYoYFormatted = formatYoY(wagesYoY);
+        const openingsYoYFormatted = formatYoY(openingsYoY);
+        const outputYoYFormatted = formatYoY(outputYoY);
 
         return `
             <tr>
@@ -525,8 +527,14 @@ function renderPanel3() {
                     ${wages ? '$' + formatNumber(wages, 0) : '--'}
                     <span class="cell-yoy ${wageYoYFormatted.class}">${wageYoYFormatted.text}</span>
                 </td>
-                <td class="cell-value">${openings ? formatNumber(openings, 0) : '--'}</td>
-                <td class="cell-value">${output ? formatNumber(output, 1) : '--'}</td>
+                <td class="cell-value">
+                    ${openings ? formatNumber(openings, 0) : '--'}
+                    <span class="cell-yoy ${openingsYoYFormatted.class}">${openingsYoYFormatted.text}</span>
+                </td>
+                <td class="cell-value">
+                    ${output ? formatNumber(output, 1) : '--'}
+                    <span class="cell-yoy ${outputYoYFormatted.class}">${outputYoYFormatted.text}</span>
+                </td>
                 <td>${createSignalBadge(signal)}</td>
             </tr>
         `;
