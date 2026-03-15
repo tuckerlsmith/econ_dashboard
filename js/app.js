@@ -23,6 +23,14 @@ import {
 
 import { SERIES_CONFIG, REGIMES, THRESHOLDS, COUNTRIES, CURRENCIES, SECTORS } from './config.js';
 
+import { calculateRegime as calcRegime } from './calculations.js';
+
+import {
+    createSparkline,
+    createCorrelationChart,
+    createYieldDollarChart
+} from './charts.js';
+
 // ============================================
 // Event Bus - Pub/Sub Pattern
 // ============================================
@@ -238,30 +246,38 @@ function onFetchProgress(completed, total) {
 // ============================================
 
 function runCalculations() {
-    // Calculate regime (placeholder - full implementation in calculations.js)
-    calculateRegimeBasic();
+    // Calculate regime using full algorithm
+    calculateRegimeFromData();
 
-    // Calculate spreads, YoY changes, etc. will be added in Phase 2
+    // Additional calculations can be added here
 }
 
-function calculateRegimeBasic() {
-    // Basic regime calculation placeholder
-    // Full implementation will be in calculations.js
-
+function calculateRegimeFromData() {
     const yieldData = getSeriesData('DGS10');
     const dollarData = getSeriesData('DTWEXBGS');
 
     if (!yieldData || !dollarData) {
         updateState('regime.current', 'indeterminate');
+        updateState('regime.correlation', null);
+        updateState('regime.yieldDirection', null);
+        updateState('regime.correlationHistory', []);
         return;
     }
 
-    // Simple placeholder: just set to indeterminate until full calc is implemented
-    // This will be replaced with the actual regime classifier in Phase 2
-    updateState('regime.current', 'indeterminate');
-    updateState('regime.correlation', null);
-    updateState('regime.yieldDirection', null);
+    // Calculate regime using the full algorithm
+    const result = calcRegime(yieldData, dollarData);
+
+    updateState('regime.current', result.regime);
+    updateState('regime.correlation', result.correlation);
+    updateState('regime.yieldDirection', result.direction);
+    updateState('regime.correlationHistory', result.correlationHistory);
+    updateState('regime.correlationDates', result.dates);
+
+    // Calculate duration (how long in current regime)
+    // For now, just set to 0 - would need historical tracking for accurate duration
     updateState('regime.duration', 0);
+
+    console.log('Regime calculated:', result.regime, 'Correlation:', result.correlation?.toFixed(3));
 }
 
 // ============================================
@@ -309,7 +325,68 @@ function renderPanel1() {
             termPremium ? `Updated ${formatDate(termPremium.lastUpdated)}` : 'Not set';
     }
 
-    // Charts will be rendered in Phase 2 with charts.js
+    // Render charts
+    renderPanel1Charts();
+}
+
+function renderPanel1Charts() {
+    // Correlation chart (180 days)
+    const correlationHistory = AppState.regime.correlationHistory || [];
+    const correlationDates = AppState.regime.correlationDates || [];
+
+    if (correlationHistory.length > 0) {
+        createCorrelationChart('chart-correlation', correlationHistory, correlationDates);
+    }
+
+    // Yield vs Dollar chart (90 days)
+    const yieldData = getSeriesData('DGS10');
+    const dollarData = getSeriesData('DTWEXBGS');
+
+    if (yieldData && dollarData) {
+        // Get last 90 observations (data is sorted desc, so reverse for chronological)
+        const yieldObs = yieldData.observations.slice(0, 90).reverse();
+        const dollarObs = dollarData.observations.slice(0, 90).reverse();
+
+        createYieldDollarChart('chart-yield-dollar', {
+            dates: yieldObs.map(o => o.date),
+            values: yieldObs.map(o => o.value)
+        }, {
+            dates: dollarObs.map(o => o.date),
+            values: dollarObs.map(o => o.value)
+        });
+    }
+
+    // Sparklines for metric cards
+    renderMetricSparklines();
+}
+
+function renderMetricSparklines() {
+    // 10Y Yield sparkline
+    const yieldData = getSeriesData('DGS10');
+    if (yieldData) {
+        const sparklineData = getSparklineData(yieldData, 90);
+        if (sparklineData.length > 0) {
+            createSparkline('spark-dgs10', sparklineData, { color: '#22c55e', showEndpoint: true });
+        }
+    }
+
+    // DXY sparkline
+    const dollarData = getSeriesData('DTWEXBGS');
+    if (dollarData) {
+        const sparklineData = getSparklineData(dollarData, 90);
+        if (sparklineData.length > 0) {
+            createSparkline('spark-dxy', sparklineData, { color: '#f59e0b', showEndpoint: true });
+        }
+    }
+
+    // 5Y5Y Forward sparkline
+    const forwardData = getSeriesData('T5YIFR');
+    if (forwardData) {
+        const sparklineData = getSparklineData(forwardData, 90);
+        if (sparklineData.length > 0) {
+            createSparkline('spark-5y5y', sparklineData, { color: '#8b5cf6', showEndpoint: true });
+        }
+    }
 }
 
 function renderPanel2() {
