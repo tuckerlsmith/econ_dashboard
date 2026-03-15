@@ -26,6 +26,12 @@ import { SERIES_CONFIG, REGIMES, THRESHOLDS, COUNTRIES, CURRENCIES, SECTORS } fr
 import { calculateRegime as calcRegime } from './calculations.js';
 
 import {
+    calculateSectorMetrics,
+    formatYoY,
+    createSignalBadge
+} from './sectors.js';
+
+import {
     createSparkline,
     createCorrelationChart,
     createYieldDollarChart,
@@ -488,20 +494,20 @@ function renderPanel2Sparklines() {
 }
 
 function renderPanel3() {
-    // Sectoral matrix - signal derivation will be added in Phase 5 (sectors.js)
     const tbody = document.getElementById('sector-matrix-body');
     if (!tbody) return;
 
-    tbody.innerHTML = SECTORS.map(sector => {
-        const empData = getSeriesData(sector.employment);
-        const wageData = getSeriesData(sector.wages);
-        const openingsData = sector.openings ? getSeriesData(sector.openings) : null;
-        const outputData = sector.output ? getSeriesData(sector.output) : null;
+    // Calculate metrics for all sectors
+    const sectorMetrics = SECTORS.map(sector =>
+        calculateSectorMetrics(sector, getSeriesData)
+    );
 
-        const empValue = empData ? getLatestValue(empData) : null;
-        const wageValue = wageData ? getLatestValue(wageData) : null;
-        const openingsValue = openingsData ? getLatestValue(openingsData) : null;
-        const outputValue = outputData ? getLatestValue(outputData) : null;
+    tbody.innerHTML = sectorMetrics.map(metrics => {
+        const { sector, employment, employmentYoY, wages, wagesYoY, openings, output, signal } = metrics;
+
+        // Format YoY values
+        const empYoYFormatted = formatYoY(employmentYoY);
+        const wageYoYFormatted = formatYoY(wagesYoY);
 
         return `
             <tr>
@@ -511,11 +517,17 @@ function renderPanel3() {
                         ${sector.shortName}
                     </div>
                 </td>
-                <td class="cell-value">${empValue ? formatNumber(empValue, 0) : '--'}</td>
-                <td class="cell-value">${wageValue ? '$' + formatNumber(wageValue, 0) : '--'}</td>
-                <td class="cell-value">${openingsValue ? formatNumber(openingsValue, 0) : '--'}</td>
-                <td class="cell-value">${outputValue ? formatNumber(outputValue, 1) : '--'}</td>
-                <td>--</td>
+                <td class="cell-value">
+                    ${employment ? formatNumber(employment, 0) : '--'}
+                    <span class="cell-yoy ${empYoYFormatted.class}">${empYoYFormatted.text}</span>
+                </td>
+                <td class="cell-value">
+                    ${wages ? '$' + formatNumber(wages, 0) : '--'}
+                    <span class="cell-yoy ${wageYoYFormatted.class}">${wageYoYFormatted.text}</span>
+                </td>
+                <td class="cell-value">${openings ? formatNumber(openings, 0) : '--'}</td>
+                <td class="cell-value">${output ? formatNumber(output, 1) : '--'}</td>
+                <td>${createSignalBadge(signal)}</td>
             </tr>
         `;
     }).join('');
