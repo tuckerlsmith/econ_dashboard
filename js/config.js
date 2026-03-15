@@ -41,18 +41,18 @@ export const SERIES_CONFIG = {
     MANEMP: { limit: 24, frequency: 'monthly' },        // Manufacturing
     USCONS: { limit: 24, frequency: 'monthly' },        // Construction
 
-    // Average Weekly Earnings
-    CES6562000011: { limit: 24, frequency: 'monthly' }, // Healthcare
-    CES6054000011: { limit: 24, frequency: 'monthly' }, // Prof & Business Services
+    // Average Weekly Earnings (All Employees) - supersector level
+    CES6500000011: { limit: 24, frequency: 'monthly' }, // Education & Health Services
+    CES6000000011: { limit: 24, frequency: 'monthly' }, // Prof & Business Services
     CES5000000011: { limit: 24, frequency: 'monthly' }, // Information
     CES3000000011: { limit: 24, frequency: 'monthly' }, // Manufacturing
     CES2000000011: { limit: 24, frequency: 'monthly' }, // Construction
 
     // Job Openings (JOLTS)
-    JTS6200JOL: { limit: 24, frequency: 'monthly' },           // Healthcare & Social Assistance
-    JTS540099000000000JOL: { limit: 24, frequency: 'monthly' }, // Professional & Business Services
-    JTS3000JOL: { limit: 24, frequency: 'monthly' },           // Manufacturing
-    JTS2300JOL: { limit: 24, frequency: 'monthly' },           // Construction
+    JTS6200JOL: { limit: 24, frequency: 'monthly' },    // Healthcare & Social Assistance
+    JTS540099JOL: { limit: 24, frequency: 'monthly' },  // Professional & Business Services
+    JTS3000JOL: { limit: 24, frequency: 'monthly' },    // Manufacturing
+    JTS2300JOL: { limit: 24, frequency: 'monthly' },    // Construction
     // Note: JOLTS for Information sector needs verification
 
     // Output Index
@@ -65,11 +65,11 @@ export const SERIES_CONFIG = {
     // CPI: Shelter (Monthly)
     CUSR0000SAH1: { limit: 36, frequency: 'monthly' },
 
-    // CPI: Medical Care (Monthly)
-    CUSR0000SAM: { limit: 36, frequency: 'monthly' },
+    // CPI: Medical Care (Monthly) - using seasonally adjusted index
+    CPIMEDSL: { limit: 36, frequency: 'monthly' },
 
-    // CPI: Energy (Monthly)
-    CUSR0000SA0E: { limit: 36, frequency: 'monthly' },
+    // CPI: Energy (Monthly) - using seasonally adjusted index
+    CPIENGSL: { limit: 36, frequency: 'monthly' },
 
     // ============================================
     // Panel 5: Comparative Sovereign Yields
@@ -102,11 +102,11 @@ export const SERIES_CONFIG = {
 export const SECTORS = [
     {
         id: 'healthcare',
-        name: 'Healthcare',
-        shortName: 'Healthcare',
+        name: 'Education & Health Services',
+        shortName: 'Ed & Health',
         color: '#f472b6',
         employment: 'CES6562000001',
-        wages: 'CES6562000011',
+        wages: 'CES6500000011',
         openings: 'JTS6200JOL',
         output: null // Quarterly BEA data - not on FRED
     },
@@ -116,8 +116,8 @@ export const SECTORS = [
         shortName: 'Prof & Business Svcs',
         color: '#818cf8',
         employment: 'USPBS',
-        wages: 'CES6054000011',
-        openings: 'JTS540099000000000JOL',
+        wages: 'CES6000000011',
+        openings: 'JTS540099JOL',
         output: null
     },
     {
