@@ -182,6 +182,8 @@ a:hover {
 
 .modal-wide {
     max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
 }
 
 .modal-content h2 {
@@ -267,6 +269,178 @@ a:hover {
 
 .modal-close:hover {
     color: var(--text-primary);
+}
+
+/* ---- Settings Form ---- */
+.settings-form {
+    color: var(--text-primary);
+}
+
+.settings-description {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.settings-grid {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.setting-item {
+    background: var(--bg-cell);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.setting-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.setting-unit {
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+.setting-input-row {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.setting-input {
+    flex: 1;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+}
+
+.setting-input:focus {
+    outline: none;
+    border-color: var(--blue);
+}
+
+.setting-input::placeholder {
+    color: var(--text-dim);
+}
+
+.btn-clear {
+    background: var(--red-bg);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-sm);
+    color: var(--red);
+    width: 32px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-clear:hover {
+    background: var(--red);
+    color: white;
+}
+
+.setting-meta {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: var(--space-xs);
+}
+
+.setting-last-updated {
+    color: var(--green);
+}
+
+.setting-source {
+    font-size: 11px;
+    color: var(--blue);
+    text-decoration: none;
+}
+
+.setting-source:hover {
+    text-decoration: underline;
+}
+
+.settings-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.btn-primary {
+    background: var(--blue);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+.btn-danger {
+    background: var(--red-bg);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    color: var(--red);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: var(--red);
+    color: white;
+}
+
+.settings-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: var(--space-lg) 0;
+}
+
+.settings-api h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+}
+
+.settings-api p {
+    margin-bottom: var(--space-md);
+}
+
+.settings-api code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-cell);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
 }
 
 /* ---- Dashboard Layout ---- */

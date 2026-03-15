@@ -44,14 +44,14 @@ location.reload();
 ## Phase 2: Regime Classifier (Complete)
 
 ### Panel 1 - Dollar Regime Diagnostic
-- [ ] [MANUAL] US 10Y Yield displays value + delta + sparkline
-- [ ] [MANUAL] Dollar Index displays value + delta + sparkline
-- [ ] [MANUAL] 60-Day Correlation displays calculated value
-- [ ] [MANUAL] Term Premium shows "Not set" or manual value
-- [ ] [MANUAL] 5Y5Y Forward displays value + delta + sparkline
-- [ ] [MANUAL] Regime badge shows regime (1-4 or ?)
-- [ ] [MANUAL] Rolling Correlation chart renders with threshold bands
-- [ ] [MANUAL] Yield vs Dollar chart renders with dual axes
+- [X] [MANUAL] US 10Y Yield displays value + delta + sparkline
+- [X] [MANUAL] Dollar Index displays value + delta + sparkline
+- [X] [MANUAL] 60-Day Correlation displays calculated value
+- [X] [MANUAL] Term Premium shows "Not set" or manual value
+- [X] [MANUAL] 5Y5Y Forward displays value + delta + sparkline
+- [X] [MANUAL] Regime badge shows regime (1-4 or ?)
+- [X] [MANUAL] Rolling Correlation chart renders with threshold bands
+- [X] [MANUAL] Yield vs Dollar chart renders with dual axes
 
 ### Calculations Verification
 - [ ] [AUTO] Correlation value is between -1 and +1
@@ -62,54 +62,54 @@ location.reload();
 ## Phase 3: Bottom Bar + Panel 2
 
 ### Panel 2 - Domestic Credit & Credibility
-- [ ] [MANUAL] HY OAS displays in basis points (expect 300-500 range)
-- [ ] [MANUAL] HY OAS has threshold coloring (green/amber/red)
-- [ ] [MANUAL] Yield Curve displays in basis points
-- [ ] [MANUAL] Deficit/GDP shows calculated percentage
-- [ ] [MANUAL] Deficit/GDP has threshold coloring
+- [X] [MANUAL] HY OAS displays in basis points (expect 300-500 range)
+- [X] [MANUAL] HY OAS has threshold coloring (green/amber/red)
+- [X] [MANUAL] Yield Curve displays in basis points
+- [X] [MANUAL] Deficit/GDP shows calculated percentage
+- [X] [MANUAL] Deficit/GDP has threshold coloring
 
 ### Bottom Bar Enhancements
 - [ ] [MANUAL] HY OAS threshold color applied
-- [ ] [MANUAL] Values update on data refresh
+- [X] [MANUAL] Values update on data refresh
 
 ---
 
 ## Phase 4: Panel 5 - International
 
 ### Sovereign Yields Table
-- [ ] [MANUAL] All 6 countries show yield values
-- [ ] [MANUAL] CHG (MoM) column shows changes
-- [ ] [MANUAL] Spread vs US calculated correctly
-- [ ] [MANUAL] Daily links work (open Investing.com)
+- [X] [MANUAL] All 6 countries show yield values
+- [X] [MANUAL] CHG (MoM) column shows changes
+- [X] [MANUAL] Spread vs US calculated correctly
+- [X] [MANUAL] Daily links work (open Investing.com)
 
 ### Key Spreads
-- [ ] [MANUAL] US-Bund spread displays
-- [ ] [MANUAL] Bund-OAT spread displays
-- [ ] [MANUAL] US-JGB spread displays
+- [X] [MANUAL] US-Bund spread displays
+- [X] [MANUAL] Bund-OAT spread displays
+- [X] [MANUAL] US-JGB spread displays
 
 ### Exchange Rates Table
-- [ ] [MANUAL] All 5 currency pairs display
-- [ ] [MANUAL] 1D CHG and 1M CHG show values
-- [ ] [MANUAL] 90D Trend sparklines render
+- [X] [MANUAL] All 5 currency pairs display
+- [X] [MANUAL] 1D CHG and 1M CHG show values
+- [X] [MANUAL] 90D Trend sparklines render
 
 ### Convergence Chart
-- [ ] [MANUAL] Chart renders with multiple country lines
-- [ ] [MANUAL] Legend shows country colors
+- [X] [MANUAL] Chart renders with multiple country lines
+- [X] [MANUAL] Legend shows country colors
 
 ---
 
 ## Phase 5: Panel 3 - Sectoral Matrix
 
 ### Data Display
-- [ ] [MANUAL] All 5 sectors show employment data
-- [ ] [MANUAL] All 5 sectors show wage data
-- [ ] [MANUAL] Openings column shows data (4 sectors)
-- [ ] [MANUAL] Output shows for Manufacturing
-- [ ] [MANUAL] Signal column shows derived signals
+- [X] [MANUAL] All 5 sectors show employment data
+- [X] [MANUAL] All 5 sectors show wage data
+- [X] [MANUAL] Openings column shows data (4 sectors)
+- [X] [MANUAL] Output shows for Manufacturing
+- [X] [MANUAL] Signal column shows derived signals
 
 ### Signal Logic
-- [ ] [AUTO] Signal derivation matches defined rules
-- [ ] [MANUAL] Signal badges have appropriate colors
+- [X] [AUTO] Signal derivation matches defined rules
+- [X] [MANUAL] Signal badges have appropriate colors
 
 ---
 

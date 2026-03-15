@@ -38,6 +38,12 @@ import {
     createConvergenceChart
 } from './charts.js';
 
+import {
+    loadManualEntries as loadManualEntriesFromStorage,
+    saveManualEntries as saveManualEntriesToStorage,
+    renderSettingsForm as renderSettingsFormFromModule
+} from './settings.js';
+
 // ============================================
 // Event Bus - Pub/Sub Pattern
 // ============================================
@@ -542,9 +548,69 @@ function renderPanel3() {
 }
 
 function renderPanel4() {
-    renderMetricCard('cpi-shelter', 'CUSR0000SAH1', { decimals: 1 });
-    renderMetricCard('cpi-medical', 'CPIMEDSL', { decimals: 1 });
-    renderMetricCard('cpi-energy', 'CPIENGSL', { decimals: 1 });
+    // CPI components with YoY% calculation
+    renderCPICard('cpi-shelter', 'CUSR0000SAH1', 'Shelter');
+    renderCPICard('cpi-medical', 'CPIMEDSL', 'Medical');
+    renderCPICard('cpi-energy', 'CPIENGSL', 'Energy');
+}
+
+/**
+ * Render a CPI metric card with index level, YoY%, and sparkline
+ */
+function renderCPICard(id, seriesId, label) {
+    const card = document.getElementById(`metric-${id}`);
+    if (!card) return;
+
+    const data = getSeriesData(seriesId);
+    if (!data || !data.observations || data.observations.length < 13) {
+        card.querySelector('.metric-value').textContent = '--';
+        card.querySelector('.metric-delta').textContent = 'Insufficient data';
+        return;
+    }
+
+    const current = data.observations[0].value;
+    const yearAgo = data.observations[12].value;
+
+    // Calculate YoY%
+    const yoy = yearAgo ? ((current - yearAgo) / yearAgo) * 100 : null;
+
+    // Display index with YoY%
+    const valueEl = card.querySelector('.metric-value');
+    const deltaEl = card.querySelector('.metric-delta');
+
+    valueEl.textContent = current ? current.toFixed(1) : '--';
+
+    if (yoy !== null) {
+        const sign = yoy >= 0 ? '+' : '';
+        deltaEl.textContent = `${sign}${yoy.toFixed(1)}% YoY`;
+        deltaEl.className = `metric-delta ${yoy > 3 ? 'delta-up' : yoy < 2 ? 'delta-down' : ''}`;
+    } else {
+        deltaEl.textContent = '--';
+        deltaEl.className = 'metric-delta';
+    }
+
+    // Create sparkline of YoY% over 24 months
+    const sparklineYoY = [];
+    for (let i = 0; i < Math.min(24, data.observations.length - 12); i++) {
+        const curr = data.observations[i].value;
+        const prev = data.observations[i + 12]?.value;
+        if (curr && prev) {
+            sparklineYoY.push(((curr - prev) / prev) * 100);
+        }
+    }
+
+    if (sparklineYoY.length > 0) {
+        // Reverse to get chronological order (oldest first)
+        const sparkData = sparklineYoY.reverse();
+
+        // Color based on current trend
+        const color = yoy > 3 ? '#ef4444' : yoy < 2 ? '#22c55e' : '#f59e0b';
+
+        createSparkline(`spark-${id}`, sparkData, {
+            color,
+            showEndpoint: true
+        });
+    }
 }
 
 function renderPanel5() {
@@ -912,13 +978,16 @@ function hideSettingsModal() {
 }
 
 function renderSettingsForm() {
-    // Will be expanded in settings.js
     const content = document.getElementById('settings-content');
-    content.innerHTML = `
-        <p>Manual entry form will be implemented in Phase 6.</p>
-        <p>Current API Key: ${getApiKey() ? '••••' + getApiKey().slice(-4) : 'Not set'}</p>
-        <button onclick="clearApiKey()" class="btn-secondary">Clear API Key</button>
-    `;
+    if (!content) return;
+
+    renderSettingsFormFromModule(content, (entries) => {
+        // Update AppState with new entries
+        AppState.manualEntries = entries;
+
+        // Re-render panels that use manual entries
+        renderPanel1();
+    });
 }
 
 // ============================================
@@ -926,22 +995,11 @@ function renderSettingsForm() {
 // ============================================
 
 function loadManualEntries() {
-    try {
-        const stored = localStorage.getItem('dashboard_manual_entries');
-        if (stored) {
-            AppState.manualEntries = JSON.parse(stored);
-        }
-    } catch (e) {
-        console.warn('Failed to load manual entries:', e);
-    }
+    AppState.manualEntries = loadManualEntriesFromStorage();
 }
 
 function saveManualEntries() {
-    try {
-        localStorage.setItem('dashboard_manual_entries', JSON.stringify(AppState.manualEntries));
-    } catch (e) {
-        console.warn('Failed to save manual entries:', e);
-    }
+    saveManualEntriesToStorage(AppState.manualEntries);
 }
 
 // ============================================
