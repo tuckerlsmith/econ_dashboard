@@ -446,10 +446,9 @@ function renderDeficitGDP() {
     // Determine if it's surplus or deficit
     const isSurplus = trailing12 > 0;
 
-    deficitCard.querySelector('.metric-value').textContent =
-        `${isSurplus ? '+' : '-'}${deficitPercent.toFixed(1)}%`;
+    deficitCard.querySelector('.metric-value').textContent = `${deficitPercent.toFixed(1)}%`;
     deficitCard.querySelector('.metric-delta').textContent =
-        isSurplus ? 'Surplus' : 'Deficit (T12M)';
+        isSurplus ? 'Surplus (T12M)' : 'Deficit (T12M)';
 
     // Apply threshold coloring
     const thresholdClass = getThresholdClass(deficitPercent, THRESHOLDS.deficitGdp);

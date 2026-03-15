@@ -631,19 +631,23 @@ a:hover {
 }
 
 /* Threshold color states */
-.threshold-green .metric-value {
+.threshold-green .metric-value,
+.threshold-green .value {
     color: var(--green);
 }
 
-.threshold-amber .metric-value {
+.threshold-amber .metric-value,
+.threshold-amber .value {
     color: var(--amber);
 }
 
-.threshold-red .metric-value {
+.threshold-red .metric-value,
+.threshold-red .value {
     color: var(--red);
 }
 
-.threshold-critical .metric-value {
+.threshold-critical .metric-value,
+.threshold-critical .value {
     color: var(--red);
     animation: pulse-value 1s infinite;
 }
