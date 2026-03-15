@@ -401,12 +401,90 @@ function renderPanel2() {
         hyOasCard.className = `metric-card ${thresholdClass}`;
     }
 
-    // Deficit/GDP calculation will be added in Phase 2
-    const deficitCard = document.getElementById('metric-deficit-gdp');
-    if (deficitCard) {
-        deficitCard.querySelector('.metric-value').textContent = '--';
-        deficitCard.querySelector('.metric-delta').textContent = 'Calculation pending';
+    // Apply yield curve inversion highlighting (negative = inverted)
+    const yieldCurveValue = getLatestValue(getSeriesData('T10Y2Y'));
+    if (yieldCurveValue !== null) {
+        const yieldCurveCard = document.getElementById('metric-yield-curve');
+        if (yieldCurveValue < 0) {
+            yieldCurveCard.classList.add('threshold-red');
+            yieldCurveCard.querySelector('.metric-delta').textContent = 'INVERTED';
+        } else {
+            yieldCurveCard.classList.remove('threshold-red');
+        }
     }
+
+    // Deficit/GDP calculation
+    renderDeficitGDP();
+
+    // Panel 2 sparklines
+    renderPanel2Sparklines();
+}
+
+function renderDeficitGDP() {
+    const deficitCard = document.getElementById('metric-deficit-gdp');
+    if (!deficitCard) return;
+
+    const deficitData = getSeriesData('MTSDS133FMS');
+    if (!deficitData || !deficitData.observations || deficitData.observations.length < 12) {
+        deficitCard.querySelector('.metric-value').textContent = '--';
+        deficitCard.querySelector('.metric-delta').textContent = 'Insufficient data';
+        return;
+    }
+
+    // Sum trailing 12 months of deficit (values are in millions, negative = deficit)
+    const trailing12 = deficitData.observations
+        .slice(0, 12)
+        .reduce((sum, obs) => sum + (obs.value || 0), 0);
+
+    // US GDP is approximately $28 trillion (28,000,000 million)
+    // This is an approximation - ideally would fetch actual GDP series
+    const approximateGDP = 28000000;
+
+    // Calculate deficit as % of GDP (make positive for display)
+    const deficitPercent = (Math.abs(trailing12) / approximateGDP) * 100;
+
+    // Determine if it's surplus or deficit
+    const isSurplus = trailing12 > 0;
+
+    deficitCard.querySelector('.metric-value').textContent =
+        `${isSurplus ? '+' : '-'}${deficitPercent.toFixed(1)}%`;
+    deficitCard.querySelector('.metric-delta').textContent =
+        isSurplus ? 'Surplus' : 'Deficit (T12M)';
+
+    // Apply threshold coloring
+    const thresholdClass = getThresholdClass(deficitPercent, THRESHOLDS.deficitGdp);
+    deficitCard.className = `metric-card ${thresholdClass}`;
+}
+
+function renderPanel2Sparklines() {
+    // HY OAS sparkline (convert to bps for display consistency)
+    const hyOasData = getSeriesData('BAMLH0A0HYM2');
+    if (hyOasData) {
+        const sparklineData = getSparklineData(hyOasData, 90).map(v => v * 100);
+        if (sparklineData.length > 0) {
+            createSparkline('spark-hy-oas', sparklineData, {
+                color: '#ef4444',
+                showEndpoint: true
+            });
+        }
+    }
+
+    // Yield Curve sparkline (convert to bps)
+    const yieldCurveData = getSeriesData('T10Y2Y');
+    if (yieldCurveData) {
+        const sparklineData = getSparklineData(yieldCurveData, 365).map(v => v * 100);
+        if (sparklineData.length > 0) {
+            // Color based on whether currently inverted
+            const currentValue = getLatestValue(yieldCurveData);
+            const color = currentValue < 0 ? '#ef4444' : '#22c55e';
+            createSparkline('spark-yield-curve', sparklineData, {
+                color,
+                showEndpoint: true
+            });
+        }
+    }
+
+    // Deficit sparkline (would need historical calculation - skip for now)
 }
 
 function renderPanel3() {
