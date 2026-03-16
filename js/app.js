@@ -641,11 +641,8 @@ function renderCPICard(id, seriesId, label) {
         const sparkData = sparklineYoY.reverse();
         const sparkDates = sparklineDates.reverse();
 
-        // Color based on current trend
-        const color = yoy > 3 ? '#ef4444' : yoy < 2 ? '#22c55e' : '#f59e0b';
-
         createSparkline(`spark-${id}`, sparkData, {
-            color,
+            color: sparklineColor(sparkData),
             showEndpoint: true,
             tooltipSuffix: '% YoY',
             tooltipDecimals: 1
