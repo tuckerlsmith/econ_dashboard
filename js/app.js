@@ -419,7 +419,7 @@ function renderMetricSparklines() {
     if (dollarData) {
         const sparklineData = getSparklineData(dollarData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-dxy', sparklineData, { color: sparklineColor(sparklineData), showEndpoint: true, tooltipDecimals: 2 }, getSparklineDates(dollarData, 90));
+            createSparkline('spark-dxy', sparklineData, { color: '#8b5cf6', showEndpoint: true, tooltipDecimals: 2 }, getSparklineDates(dollarData, 90));
         }
     }
 
