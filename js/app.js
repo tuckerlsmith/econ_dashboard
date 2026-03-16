@@ -399,13 +399,18 @@ function renderPanel1Charts() {
     renderMetricSparklines();
 }
 
+function sparklineColor(data) {
+    if (!data || data.length < 2) return '#3b82f6';
+    return data[data.length - 1] >= data[0] ? '#ef4444' : '#22c55e';
+}
+
 function renderMetricSparklines() {
     // 10Y Yield sparkline
     const yieldData = getSeriesData('DGS10');
     if (yieldData) {
         const sparklineData = getSparklineData(yieldData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-dgs10', sparklineData, { color: '#22c55e', showEndpoint: true, tooltipSuffix: '%', tooltipDecimals: 2 }, getSparklineDates(yieldData, 90));
+            createSparkline('spark-dgs10', sparklineData, { color: sparklineColor(sparklineData), showEndpoint: true, tooltipSuffix: '%', tooltipDecimals: 2 }, getSparklineDates(yieldData, 90));
         }
     }
 
@@ -414,7 +419,7 @@ function renderMetricSparklines() {
     if (dollarData) {
         const sparklineData = getSparklineData(dollarData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-dxy', sparklineData, { color: '#f59e0b', showEndpoint: true, tooltipDecimals: 2 }, getSparklineDates(dollarData, 90));
+            createSparkline('spark-dxy', sparklineData, { color: sparklineColor(sparklineData), showEndpoint: true, tooltipDecimals: 2 }, getSparklineDates(dollarData, 90));
         }
     }
 
@@ -423,7 +428,7 @@ function renderMetricSparklines() {
     if (forwardData) {
         const sparklineData = getSparklineData(forwardData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-5y5y', sparklineData, { color: '#8b5cf6', showEndpoint: true, tooltipSuffix: '%', tooltipDecimals: 2 }, getSparklineDates(forwardData, 90));
+            createSparkline('spark-5y5y', sparklineData, { color: sparklineColor(sparklineData), showEndpoint: true, tooltipSuffix: '%', tooltipDecimals: 2 }, getSparklineDates(forwardData, 90));
         }
     }
 }
@@ -501,7 +506,7 @@ function renderPanel2Sparklines() {
         const sparklineData = getSparklineData(hyOasData, 90).map(v => v * 100);
         if (sparklineData.length > 0) {
             createSparkline('spark-hy-oas', sparklineData, {
-                color: '#ef4444',
+                color: sparklineColor(sparklineData),
                 showEndpoint: true,
                 tooltipSuffix: ' bps',
                 tooltipDecimals: 0
@@ -756,7 +761,7 @@ function renderCurrenciesTable() {
             const sparklineData = getSparklineData(data, 90);
             if (sparklineData.length > 0) {
                 createSparkline(`spark-fx-${index}`, sparklineData, {
-                    color: '#3b82f6',
+                    color: sparklineColor(sparklineData),
                     showEndpoint: true,
                     tooltipDecimals: 4
                 }, getSparklineDates(data, 90));
