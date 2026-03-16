@@ -5,6 +5,9 @@ Issues to address after all phases complete:
 ## Styling
 - [ ] Bottom bar HY OAS threshold coloring not applying (CSS selector issue)
 
+## Mobile
+- [ ] Bottom sheet swipe-to-dismiss gesture (currently only tap/X works)
+
 ## Enhancements
 - [ ] Regime duration tracking (days in current regime)
 - [ ] Regime 2 alert styling (amber >5 days, red pulse >30 days)
