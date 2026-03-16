@@ -544,13 +544,21 @@ function renderPanel3() {
     );
 
     tbody.innerHTML = sectorMetrics.map(metrics => {
-        const { sector, employment, employmentYoY, wages, wagesYoY, openings, openingsYoY, output, outputYoY, signal } = metrics;
+        const { sector, employment, employmentYoY, wages, wagesYoY, openings, openingsYoY, output, outputYoY, outputDate, signal } = metrics;
 
         // Format YoY values
         const empYoYFormatted = formatYoY(employmentYoY);
         const wageYoYFormatted = formatYoY(wagesYoY);
         const openingsYoYFormatted = formatYoY(openingsYoY);
         const outputYoYFormatted = formatYoY(outputYoY);
+
+        // Ed & Health openings covers NAICS 62 only — mark with asterisk
+        const openingsLabel = sector.id === 'healthcare' ? '*' : '';
+
+        // Format output as $X,XXX.XB with quarter label (data is quarterly)
+        const outputDisplay = output !== null
+            ? `$${formatNumber(output, 1)}B<span class="cell-quarter">${dateToQuarter(outputDate)}</span>`
+            : '--';
 
         return `
             <tr>
@@ -569,17 +577,29 @@ function renderPanel3() {
                     <span class="cell-yoy ${wageYoYFormatted.class}">${wageYoYFormatted.text}</span>
                 </td>
                 <td class="cell-value">
-                    ${openings ? formatNumber(openings, 0) : '--'}
+                    ${openings ? formatNumber(openings, 0) + openingsLabel : '--'}
                     <span class="cell-yoy ${openingsYoYFormatted.class}">${openingsYoYFormatted.text}</span>
                 </td>
                 <td class="cell-value">
-                    ${output ? formatNumber(output, 1) : '--'}
+                    ${outputDisplay}
                     <span class="cell-yoy ${outputYoYFormatted.class}">${outputYoYFormatted.text}</span>
                 </td>
                 <td>${createSignalBadge(signal)}</td>
             </tr>
         `;
     }).join('');
+
+    // Footnote for Ed & Health openings scope
+    const summary = document.getElementById('sector-summary');
+    if (summary) {
+        const existingNote = summary.querySelector('.sector-footnote');
+        if (!existingNote) {
+            const note = document.createElement('p');
+            note.className = 'sector-footnote';
+            note.textContent = '* Openings: Healthcare & Social Assistance (NAICS 62) only — JOLTS does not publish a combined Education & Health SA series.';
+            summary.prepend(note);
+        }
+    }
 }
 
 function renderPanel4() {
@@ -715,21 +735,23 @@ function renderCurrenciesTable() {
 
     currenciesBody.innerHTML = CURRENCIES.map((currency, index) => {
         const data = getSeriesData(currency.series);
-        const value = data ? getLatestValue(data) : null;
+        const rawValue = data ? getLatestValue(data) : null;
 
-        // 1-day change
-        const prevDay = data?.observations?.[1]?.value ?? null;
+        // For pairs where FRED quotes USD-per-foreign (EUR, GBP), invert to get foreign-per-USD
+        const display = (raw) => (raw !== null && !currency.invert) ? 1 / raw : raw;
+
+        const value = display(rawValue);
+        const prevDay = display(data?.observations?.[1]?.value ?? null);
+        const prevMonth = display(data?.observations?.[22]?.value ?? null);
+
+        // % changes — all pairs now: higher = stronger dollar, so positive = green
         const dayChange = (value !== null && prevDay !== null)
             ? ((value - prevDay) / prevDay * 100).toFixed(2)
             : null;
-
-        // 1-month change (approx 22 trading days)
-        const prevMonth = data?.observations?.[22]?.value ?? null;
         const monthChange = (value !== null && prevMonth !== null)
             ? ((value - prevMonth) / prevMonth * 100).toFixed(2)
             : null;
 
-        // Format changes with color
         const dayClass = dayChange > 0 ? 'delta-up' : dayChange < 0 ? 'delta-down' : '';
         const monthClass = monthChange > 0 ? 'delta-up' : monthChange < 0 ? 'delta-down' : '';
 
@@ -755,7 +777,11 @@ function renderCurrenciesTable() {
     CURRENCIES.forEach((currency, index) => {
         const data = getSeriesData(currency.series);
         if (data) {
-            const sparklineData = getSparklineData(data, 90);
+            // Invert raw values for EUR/GBP so sparkline matches displayed direction
+            let sparklineData = getSparklineData(data, 90);
+            if (!currency.invert) {
+                sparklineData = sparklineData.map(v => (v !== null && v !== 0) ? 1 / v : null);
+            }
             if (sparklineData.length > 0) {
                 createSparkline(`spark-fx-${index}`, sparklineData, {
                     color: sparklineColor(sparklineData),
@@ -1181,7 +1207,7 @@ function renderExplainerTabs() {
     // Bond Explainer tab
     const bondContainer = document.getElementById('bond-explainer-content');
     if (bondContainer) {
-        renderBondExplainerTab(bondContainer);
+        renderBondExplainerTab(bondContainer, getSeriesData);
     }
 
     // Energy Explainer tab
@@ -1231,6 +1257,13 @@ function hideErrorBanner() {
 // ============================================
 // Utility Functions
 // ============================================
+
+function dateToQuarter(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    const q = Math.floor(d.getMonth() / 3) + 1;
+    return `Q${q} ${d.getFullYear()}`;
+}
 
 function formatNumber(value, decimals = 2) {
     if (value === null || value === undefined || isNaN(value)) return '--';

@@ -4,6 +4,7 @@
  */
 
 import { getManualEntry } from './settings.js';
+import { calculateImportShares } from './calculations.js';
 
 // ============================================
 // Indicator Explainer Content
@@ -587,13 +588,13 @@ function handleOutsideClick(e) {
  * Render the Bond Explainer tab content
  * @param {HTMLElement} container - Container element
  */
-export function renderBondExplainerTab(container) {
+export function renderBondExplainerTab(container, getSeriesData) {
     const html = BOND_EXPLAINER_SECTIONS.map(section => {
         let content = section.content;
 
         // Handle dynamic structural baseline section
         if (section.id === 'structural-baseline') {
-            content = renderStructuralBaseline();
+            content = renderStructuralBaseline(getSeriesData);
         }
 
         return `
@@ -682,21 +683,48 @@ export function renderEnergyExplainerTab(container) {
 }
 
 /**
- * Render structural baseline data from manual entries
+ * Render structural baseline data.
+ * NAFTA and China import shares are auto-calculated from FRED when available;
+ * falls back to manual entry if FRED data is missing.
+ * @param {Function} getSeriesData - Series data accessor from app.js
  */
-function renderStructuralBaseline() {
-    const entries = [
-        { key: 'dollarReserveShare', label: 'USD Share of Global Reserves', unit: '%' },
-        { key: 'dollarInvoicingShare', label: 'USD Invoicing Share', unit: '%' },
-        { key: 'naftaShareImports', label: 'NAFTA Share of US Imports', unit: '%' },
-        { key: 'chinaShareImports', label: 'China Share of US Imports', unit: '%' },
-        { key: 'rmbSwiftShare', label: 'RMB Share of SWIFT Payments', unit: '%' }
-    ];
+function renderStructuralBaseline(getSeriesData) {
+    // Auto-calculate import shares from FRED if data is available
+    const importShares = getSeriesData ? calculateImportShares(getSeriesData) : null;
 
-    const rows = entries.map(entry => {
-        const data = getManualEntry(entry.key);
-        const value = data ? `${data.value}${entry.unit}` : '<span class="no-data">Not set</span>';
-        const updated = data ? formatDate(data.lastUpdated) : '';
+    const formatDataThrough = (isoDate) => {
+        if (!isoDate) return '';
+        const d = new Date(isoDate + 'T00:00:00'); // avoid timezone shift
+        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    };
+
+    const rows = [
+        { key: 'dollarReserveShare', label: 'USD Share of Global Reserves', unit: '%', auto: null },
+        { key: 'dollarInvoicingShare', label: 'USD Invoicing Share', unit: '%', auto: null },
+        {
+            key: 'naftaShareImports',
+            label: 'NAFTA Share of US Imports',
+            unit: '%',
+            auto: importShares ? { value: importShares.nafta, dataThrough: importShares.dataThrough } : null
+        },
+        {
+            key: 'chinaShareImports',
+            label: 'China Share of US Imports',
+            unit: '%',
+            auto: importShares ? { value: importShares.china, dataThrough: importShares.dataThrough } : null
+        },
+        { key: 'rmbSwiftShare', label: 'RMB Share of SWIFT Payments', unit: '%', auto: null }
+    ].map(entry => {
+        let value, updated;
+
+        if (entry.auto) {
+            value = `${entry.auto.value.toFixed(1)}${entry.unit}`;
+            updated = `<span class="baseline-auto">FRED auto · Data through ${formatDataThrough(entry.auto.dataThrough)}</span>`;
+        } else {
+            const data = getManualEntry(entry.key);
+            value = data ? `${data.value}${entry.unit}` : '<span class="no-data">Not set</span>';
+            updated = data ? formatDate(data.lastUpdated) : '';
+        }
 
         return `
             <tr>
@@ -708,13 +736,13 @@ function renderStructuralBaseline() {
     }).join('');
 
     return `
-        <p>Manual entry values for structural context. Update via Settings.</p>
+        <p>Import shares auto-calculated from FRED (trailing 12-month sums). Other values via Settings.</p>
         <table class="baseline-table">
             <thead>
                 <tr>
                     <th>Metric</th>
                     <th>Value</th>
-                    <th>Last Updated</th>
+                    <th>Source / Updated</th>
                 </tr>
             </thead>
             <tbody>

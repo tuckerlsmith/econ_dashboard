@@ -54,15 +54,16 @@ export const SIGNALS = {
 /**
  * Calculates YoY percentage change for a series
  * @param {Object} seriesData - Series data with observations
+ * @param {number} periodsPerYear - Observations per year: 12 for monthly (default), 4 for quarterly
  * @returns {number|null} YoY percentage change
  */
-export function calculateYoY(seriesData) {
-    if (!seriesData?.observations || seriesData.observations.length < 13) {
+export function calculateYoY(seriesData, periodsPerYear = 12) {
+    if (!seriesData?.observations || seriesData.observations.length <= periodsPerYear) {
         return null;
     }
 
     const current = seriesData.observations[0].value;
-    const yearAgo = seriesData.observations[12].value;
+    const yearAgo = seriesData.observations[periodsPerYear].value;
 
     if (current == null || yearAgo == null || yearAgo === 0) {
         return null;
@@ -145,11 +146,11 @@ export function calculateSectorMetrics(sector, getSeriesData) {
     const openings = openingsData?.observations?.[0]?.value ?? null;
     const output = outputData?.observations?.[0]?.value ?? null;
 
-    // YoY changes
+    // YoY changes (output is quarterly — use 4 periods per year)
     const employmentYoY = calculateYoY(empData);
     const wagesYoY = calculateYoY(wageData);
     const openingsYoY = calculateYoY(openingsData);
-    const outputYoY = calculateYoY(outputData);
+    const outputYoY = calculateYoY(outputData, 4);
 
     // Derive signal
     const signal = deriveSignal({
@@ -158,6 +159,8 @@ export function calculateSectorMetrics(sector, getSeriesData) {
         output: outputYoY,
         wages: wagesYoY
     });
+
+    const outputDate = outputData?.observations?.[0]?.date ?? null;
 
     return {
         sector,
@@ -169,6 +172,7 @@ export function calculateSectorMetrics(sector, getSeriesData) {
         openingsYoY,
         output,
         outputYoY,
+        outputDate,
         signal
     };
 }

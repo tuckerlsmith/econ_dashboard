@@ -246,6 +246,49 @@ export function calculateYoY(seriesData) {
 }
 
 /**
+ * Calculates NAFTA and China import shares from FRED trade data.
+ * Uses trailing 12-month sums to smooth NSA seasonality.
+ * NAFTA Share = (Canada + Mexico) / Total × 100
+ * China Share = China / Total × 100
+ *
+ * @param {Function} getSeriesData - Function to retrieve series data by ID
+ * @returns {{ nafta: number, china: number, dataThrough: string }|null}
+ *   Returns null if any required series is unavailable or has insufficient data.
+ */
+export function calculateImportShares(getSeriesData) {
+    const totalData = getSeriesData('IMP0015');
+    const chinaData = getSeriesData('IMPCH');
+    const canadaData = getSeriesData('IMPCA');
+    const mexicoData = getSeriesData('IMPX');
+
+    // Need at least 12 observations for a trailing 12-month sum
+    const series = [totalData, chinaData, canadaData, mexicoData];
+    if (series.some(s => !s?.observations || s.observations.length < 12)) {
+        return null;
+    }
+
+    // Sum the 12 most recent monthly observations (observations are sorted desc)
+    const sum12 = (data) => data.observations.slice(0, 12).reduce((acc, o) => acc + o.value, 0);
+
+    const total12 = sum12(totalData);
+    const china12 = sum12(chinaData);
+    const canada12 = sum12(canadaData);
+    const mexico12 = sum12(mexicoData);
+
+    if (total12 === 0) return null;
+
+    // dataThrough = date of the most recent observation across all four series (min of the four latest dates)
+    const latestDates = series.map(s => s.observations[0].date);
+    const dataThrough = latestDates.sort()[0]; // earliest of the four latest = most-lagged series
+
+    return {
+        nafta: (canada12 + mexico12) / total12 * 100,
+        china: china12 / total12 * 100,
+        dataThrough
+    };
+}
+
+/**
  * Gets threshold class for a value
  * @param {number} value - The value to check
  * @param {Array} thresholds - Array of threshold objects { max, class }

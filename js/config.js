@@ -35,7 +35,7 @@ export const SERIES_CONFIG = {
     // ============================================
 
     // Employment - All Employees
-    CES6562000001: { limit: 24, frequency: 'monthly' }, // Healthcare & Social Assistance
+    USEHS: { limit: 24, frequency: 'monthly' },         // Education & Health Services supersector (NAICS 61+62)
     USPBS: { limit: 24, frequency: 'monthly' },         // Professional & Business Services
     USINFO: { limit: 24, frequency: 'monthly' },        // Information
     MANEMP: { limit: 24, frequency: 'monthly' },        // Manufacturing
@@ -51,12 +51,27 @@ export const SERIES_CONFIG = {
     // Job Openings (JOLTS)
     JTS6200JOL: { limit: 24, frequency: 'monthly' },    // Healthcare & Social Assistance
     JTS540099JOL: { limit: 24, frequency: 'monthly' },  // Professional & Business Services
+    JTS5100JOL: { limit: 24, frequency: 'monthly' },    // Information (SA; fallback: JTU5100JOL NSA)
     JTS3000JOL: { limit: 24, frequency: 'monthly' },    // Manufacturing
     JTS2300JOL: { limit: 24, frequency: 'monthly' },    // Construction
-    // Note: JOLTS for Information sector needs verification
 
-    // Output Index
-    IPMAN: { limit: 24, frequency: 'monthly' }, // Industrial Production: Manufacturing
+    // Real Value Added by Industry (BEA GDP by Industry release, Quarterly)
+    // Units: Billions of Chained 2017 Dollars, SAAR
+    RVAMA: { limit: 12, frequency: 'quarterly' },   // Manufacturing (NAICS 31-33)
+    RVAC: { limit: 12, frequency: 'quarterly' },    // Construction (NAICS 23)
+    RVAI: { limit: 12, frequency: 'quarterly' },    // Information (NAICS 51)
+    RVAPBS: { limit: 12, frequency: 'quarterly' },  // Professional and Business Services (NAICS 54-56)
+    RVAESHS: { limit: 12, frequency: 'quarterly' }, // Ed Services, Health Care & Social Assistance (NAICS 61-62) — ID unconfirmed; shows -- if unavailable
+
+    // ============================================
+    // Bond Explainer: Import Share Auto-Calculation
+    // ============================================
+
+    // US Goods Imports (NSA, Monthly) — Census/BEA via FRED
+    IMP0015: { limit: 24, frequency: 'monthly' }, // Total US Goods Imports (World) — NSA denominator
+    IMPCH: { limit: 24, frequency: 'monthly' },   // China Imports
+    IMPCA: { limit: 24, frequency: 'monthly' },   // Canada Imports
+    IMPX: { limit: 24, frequency: 'monthly' },    // Mexico Imports
 
     // ============================================
     // Panel 4: Domestic Expenses (CPI Components)
@@ -103,12 +118,12 @@ export const SECTORS = [
     {
         id: 'healthcare',
         name: 'Education & Health Services',
-        shortName: 'Ed & Health',
+        shortName: 'Education & Health',
         color: '#f472b6',
-        employment: 'CES6562000001',
-        wages: 'CES6500000011',
-        openings: 'JTS6200JOL',
-        output: null // Quarterly BEA data - not on FRED
+        employment: 'USEHS',           // All Employees, Ed & Health Services supersector (NAICS 61+62)
+        wages: 'CES6500000011',        // Avg Weekly Earnings, Ed & Health Services supersector (NAICS 61+62)
+        openings: 'JTS6200JOL',        // JOLTS: Healthcare & Social Assistance only (NAICS 62) — JOLTS does not publish combined Ed/Health SA
+        output: 'RVAESHS',             // Real Value Added, Ed Services + Health Care & Social Assistance (series ID unconfirmed — shows -- if unavailable)
     },
     {
         id: 'profserv',
@@ -118,7 +133,7 @@ export const SECTORS = [
         employment: 'USPBS',
         wages: 'CES6000000011',
         openings: 'JTS540099JOL',
-        output: null
+        output: 'RVAPBS'               // Real Value Added, Professional and Business Services
     },
     {
         id: 'infotech',
@@ -127,8 +142,8 @@ export const SECTORS = [
         color: '#06b6d4',
         employment: 'USINFO',
         wages: 'CES5000000011',
-        openings: null, // JOLTS series ID needs verification
-        output: null
+        openings: 'JTS5100JOL', // SA; if FRED returns no data, fall back to JTU5100JOL (NSA)
+        output: 'RVAI'                 // Real Value Added, Information
     },
     {
         id: 'manufacturing',
@@ -138,7 +153,7 @@ export const SECTORS = [
         employment: 'MANEMP',
         wages: 'CES3000000011',
         openings: 'JTS3000JOL',
-        output: 'IPMAN'
+        output: 'RVAMA'                // Real Value Added, Manufacturing (replaces IPMAN index)
     },
     {
         id: 'construction',
@@ -148,7 +163,7 @@ export const SECTORS = [
         employment: 'USCONS',
         wages: 'CES2000000011',
         openings: 'JTS2300JOL',
-        output: null
+        output: 'RVAC'                 // Real Value Added, Construction
     }
 ];
 
@@ -220,41 +235,45 @@ export const COUNTRIES = [
 // Currency Configuration
 // ============================================
 
+// All pairs expressed as units of foreign currency per 1 USD.
+// Higher value = stronger dollar in every row.
+// invert: true  → FRED quotes this as foreign-per-USD already; no math needed
+// invert: false → FRED quotes USD-per-foreign; displayValue = 1 / fredValue
 export const CURRENCIES = [
     {
-        id: 'eurusd',
-        pair: 'EUR/USD',
+        id: 'usdeur',
+        pair: 'USD/EUR',
         series: 'DEXUSEU',
-        description: 'Dollars per Euro',
-        invertDisplay: false // Higher = stronger euro
+        description: 'Euro per Dollar',
+        invert: false // FRED: USD per EUR → display 1/value (EUR per USD)
     },
     {
-        id: 'gbpusd',
-        pair: 'GBP/USD',
+        id: 'usdgbp',
+        pair: 'USD/GBP',
         series: 'DEXUSUK',
-        description: 'Dollars per Pound',
-        invertDisplay: false
+        description: 'Pounds per Dollar',
+        invert: false // FRED: USD per GBP → display 1/value (GBP per USD)
     },
     {
         id: 'usdjpy',
         pair: 'USD/JPY',
         series: 'DEXJPUS',
         description: 'Yen per Dollar',
-        invertDisplay: true // Higher = stronger dollar
+        invert: true // FRED: JPY per USD → already correct
     },
     {
         id: 'usdcny',
         pair: 'USD/CNY',
         series: 'DEXCHUS',
         description: 'Yuan per Dollar',
-        invertDisplay: true
+        invert: true // FRED: CNY per USD → already correct
     },
     {
         id: 'usdkrw',
         pair: 'USD/KRW',
         series: 'DEXKOUS',
         description: 'Won per Dollar',
-        invertDisplay: true
+        invert: true // FRED: KRW per USD → already correct
     }
 ];
 

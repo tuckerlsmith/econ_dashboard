@@ -1107,6 +1107,26 @@ a:hover {
     gap: var(--space-sm);
 }
 
+.table-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: var(--space-sm);
+    margin-top: calc(-1 * var(--space-sm));
+}
+
+.sector-footnote {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: var(--space-sm);
+}
+
+.cell-quarter {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1;
+}
+
 /* ---- Panel Tabs ---- */
 .panel-tabs {
     display: flex;
@@ -1797,6 +1817,11 @@ a:hover {
 .baseline-updated {
     font-size: 11px;
     color: var(--text-dim);
+}
+
+.baseline-auto {
+    font-size: 11px;
+    color: var(--accent-blue, #3b82f6);
 }
 
 .no-data {
