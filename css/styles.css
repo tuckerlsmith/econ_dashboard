@@ -1877,10 +1877,19 @@ a:hover {
         -webkit-overflow-scrolling: touch;
         margin: 0 calc(-1 * var(--space-md));
         padding: 0 var(--space-md);
+        max-width: 100vw;
     }
 
     .matrix {
-        min-width: 600px;
+        min-width: 500px;
+    }
+
+    #yields-matrix {
+        min-width: 480px;
+    }
+
+    #currencies-matrix {
+        min-width: 400px;
     }
 
     .matrix th:first-child,
@@ -1896,13 +1905,46 @@ a:hover {
         background: var(--bg-cell);
     }
 
+    /* Prevent sub-sections from causing overflow */
+    .sub-section {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    /* Contain overflow in panels and tabs */
+    .panel-group {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .tab-content {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .panel-content {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
     .panel-tabs {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 calc(-1 * var(--space-sm));
+        padding: 4px var(--space-sm);
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .panel-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
     }
 
     .panel-tab {
         padding: 8px 12px;
         font-size: 11px;
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 
     .bottom-bar {
