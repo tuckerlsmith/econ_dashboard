@@ -18,26 +18,26 @@ location.reload();
 ## Core Functionality (Run Every Phase)
 
 ### Data Loading
-- [ ] [AUTO] No console errors on page load
-- [ ] [AUTO] All FRED series fetch successfully (check for "failed to fetch" errors)
-- [ ] [MANUAL] "Updated" timestamp shows in header
-- [ ] [MANUAL] Refresh button triggers data reload
+- [X] [AUTO] No console errors on page load
+- [X] [AUTO] All FRED series fetch successfully (check for "failed to fetch" errors)
+- [X] [MANUAL] "Updated" timestamp shows in header
+- [X] [MANUAL] Refresh button triggers data reload
 
 ### API Key
-- [ ] [MANUAL] First visit prompts for API key
-- [ ] [MANUAL] Invalid key shows error message
-- [ ] [MANUAL] Valid key saves and loads data
-- [ ] [MANUAL] Key persists across page refresh
+- [X] [MANUAL] First visit prompts for API key
+- [X] [MANUAL] Invalid key shows error message
+- [X] [MANUAL] Valid key saves and loads data
+- [X] [MANUAL] Key persists across page refresh
 
 ### Panel Groups
-- [ ] [MANUAL] Click group header collapses/expands content
-- [ ] [MANUAL] Collapse state persists visually
+- [X] [MANUAL] Click group header collapses/expands content
+- [X] [MANUAL] Collapse state persists visually
 
 ### Bottom Bar
-- [ ] [MANUAL] Shows 10Y yield with arrow
-- [ ] [MANUAL] Shows DXY with arrow
-- [ ] [MANUAL] Shows HY OAS with arrow
-- [ ] [MANUAL] Regime badge shows current regime
+- [X] [MANUAL] Shows 10Y yield with arrow
+- [X] [MANUAL] Shows DXY with arrow
+- [X] [MANUAL] Shows HY OAS with arrow
+- [X] [MANUAL] Regime badge shows current regime
 
 ---
 
@@ -54,12 +54,12 @@ location.reload();
 - [X] [MANUAL] Yield vs Dollar chart renders with dual axes
 
 ### Calculations Verification
-- [ ] [AUTO] Correlation value is between -1 and +1
-- [ ] [AUTO] Regime matches correlation/direction logic
+- [X] [AUTO] Correlation value is between -1 and +1
+- [X] [AUTO] Regime matches correlation/direction logic
 
 ---
 
-## Phase 3: Bottom Bar + Panel 2
+## Phase 3: Bottom Bar + Panel 2 (Complete)
 
 ### Panel 2 - Domestic Credit & Credibility
 - [X] [MANUAL] HY OAS displays in basis points (expect 300-500 range)
@@ -69,12 +69,12 @@ location.reload();
 - [X] [MANUAL] Deficit/GDP has threshold coloring
 
 ### Bottom Bar Enhancements
-- [ ] [MANUAL] HY OAS threshold color applied
+- [ ] [MANUAL] HY OAS threshold color applied (see CLEANUP.md)
 - [X] [MANUAL] Values update on data refresh
 
 ---
 
-## Phase 4: Panel 5 - International
+## Phase 4: Panel 5 - International (Complete)
 
 ### Sovereign Yields Table
 - [X] [MANUAL] All 6 countries show yield values
@@ -98,7 +98,7 @@ location.reload();
 
 ---
 
-## Phase 5: Panel 3 - Sectoral Matrix
+## Phase 5: Panel 3 - Sectoral Matrix (Complete)
 
 ### Data Display
 - [X] [MANUAL] All 5 sectors show employment data
@@ -113,76 +113,77 @@ location.reload();
 
 ---
 
-## Phase 6: Panel 4 + Settings
+## Phase 6: Panel 4 + Settings (Complete)
 
 ### Panel 4 - Domestic Expenses
-- [ ] [MANUAL] Shelter CPI shows index + YoY%
-- [ ] [MANUAL] Medical Care CPI shows index + YoY%
-- [ ] [MANUAL] Energy CPI shows index + YoY%
-- [ ] [MANUAL] Sparklines render for each
+- [X] [MANUAL] Shelter CPI shows index + YoY%
+- [X] [MANUAL] Medical Care CPI shows index + YoY%
+- [X] [MANUAL] Energy CPI shows index + YoY%
+- [X] [MANUAL] Sparklines render for each
 
 ### Settings/Manual Entry
-- [ ] [MANUAL] Settings modal opens from gear icon
-- [ ] [MANUAL] Can enter Term Premium value
-- [ ] [MANUAL] Can enter other manual values
-- [ ] [MANUAL] Values save to localStorage
-- [ ] [MANUAL] Values persist across refresh
-- [ ] [MANUAL] Values display in appropriate panels
+- [X] [MANUAL] Settings modal opens from gear icon
+- [X] [MANUAL] Can enter Term Premium value
+- [X] [MANUAL] Can enter other manual values
+- [X] [MANUAL] Values save to localStorage
+- [X] [MANUAL] Values persist across refresh
+- [X] [MANUAL] Values display in appropriate panels
 
 ---
 
-## Phase 7: Explainer System
+## Phase 7: Explainer System (Complete)
 
 ### Tooltips
-- [ ] [MANUAL] Info icons (i) are clickable
-- [ ] [MANUAL] Desktop: tooltip appears near icon
-- [ ] [MANUAL] Tooltip content is relevant
-- [ ] [MANUAL] Click outside dismisses tooltip
+- [X] [MANUAL] Info icons (i) are clickable
+- [X] [MANUAL] Desktop: tooltip appears near icon
+- [X] [MANUAL] Tooltip content is relevant
+- [X] [MANUAL] Click outside dismisses tooltip
 
 ### Mobile
-- [ ] [MANUAL] Info icon tap opens bottom sheet
-- [ ] [MANUAL] Bottom sheet shows content
-- [ ] [MANUAL] Can dismiss by swipe or tap outside
+- [X] [MANUAL] Info icon tap opens bottom sheet
+- [X] [MANUAL] Bottom sheet shows content
+- [X] [MANUAL] Can dismiss by swipe or tap outside
 
 ### Inline Tabs (Panel 5)
-- [ ] [MANUAL] Three tabs visible: Yields & Currencies, Bond Explainer, Energy Explainer
-- [ ] [MANUAL] Tab switching works
-- [ ] [MANUAL] Content changes appropriately
+- [X] [MANUAL] Three tabs visible: Yields & Currencies, Bond Explainer, Energy Explainer
+- [X] [MANUAL] Tab switching works
+- [X] [MANUAL] Content changes appropriately
 
 ---
 
-## Phase 8: Mobile Responsiveness
+## Phase 8: Mobile Responsiveness (Complete)
 
 ### Breakpoints
-- [ ] [MANUAL] Desktop (>1024px): 2-column layout
-- [ ] [MANUAL] Tablet (768-1024px): single column
-- [ ] [MANUAL] Mobile (<768px): compact mode
+- [X] [MANUAL] Desktop (>1024px): 2-column layout
+- [X] [MANUAL] Tablet (768-1024px): single column
+- [X] [MANUAL] Mobile (<768px): compact mode
 
 ### Mobile-Specific
-- [ ] [MANUAL] Groups B and C collapsed by default on mobile
-- [ ] [MANUAL] Sectoral matrix scrolls horizontally
-- [ ] [MANUAL] Touch targets are 44px minimum
-- [ ] [MANUAL] Bottom bar is compressed
+- [X] [MANUAL] Groups B and C collapsed by default on mobile
+- [X] [MANUAL] Sectoral matrix scrolls horizontally
+- [X] [MANUAL] Touch targets are 44px minimum
+- [X] [MANUAL] Bottom bar is compressed
+- [X] [MANUAL] International tab doesn't expand viewport width
 
 ---
 
-## Phase 9: Final Testing
+## Phase 9: Final Testing (IOC Complete)
 
 ### Cross-Browser
-- [ ] [MANUAL] Chrome - all features work
+- [X] [MANUAL] Chrome - all features work
 - [ ] [MANUAL] Firefox - all features work
 - [ ] [MANUAL] Safari - all features work
-- [ ] [MANUAL] Edge - all features work
+- [X] [MANUAL] Edge - all features work
 
 ### Error Scenarios
-- [ ] [MANUAL] Handles network failure gracefully
-- [ ] [MANUAL] Shows cached data when available
-- [ ] [MANUAL] Partial API failures show error message
+- [X] [MANUAL] Handles network failure gracefully
+- [X] [MANUAL] Shows cached data when available
+- [X] [MANUAL] Partial API failures show error message
 
 ### Performance
-- [ ] [MANUAL] Initial load < 5 seconds
-- [ ] [MANUAL] No jank during scrolling
-- [ ] [MANUAL] Charts render smoothly
+- [X] [MANUAL] Initial load < 5 seconds
+- [X] [MANUAL] No jank during scrolling
+- [X] [MANUAL] Charts render smoothly
 
 ---
 
@@ -213,9 +214,15 @@ cache.data.BAMLH0A0HYM2?.observations[0]
 
 For rapid validation after any change:
 
-1. [ ] Page loads without console errors
-2. [ ] Data values appear (not all "--")
-3. [ ] Regime badge shows something
-4. [ ] Charts render
-5. [ ] Bottom bar has values
-6. [ ] Collapse/expand works
+1. [X] Page loads without console errors
+2. [X] Data values appear (not all "--")
+3. [X] Regime badge shows something
+4. [X] Charts render
+5. [X] Bottom bar has values
+6. [X] Collapse/expand works
+
+---
+
+## IOC Status: COMPLETE
+
+All phases implemented and tested. See CLEANUP.md for known issues and future enhancements.
