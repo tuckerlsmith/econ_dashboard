@@ -51,7 +51,8 @@ export const SERIES_CONFIG = {
     // Job Openings (JOLTS)
     JTS6200JOL: { limit: 24, frequency: 'monthly' },    // Healthcare & Social Assistance
     JTS540099JOL: { limit: 24, frequency: 'monthly' },  // Professional & Business Services
-    JTS5100JOL: { limit: 24, frequency: 'monthly' },    // Information (SA; fallback: JTU5100JOL NSA)
+    JTU5100JOL: { limit: 24, frequency: 'monthly' },    // Information (NSA — no SA version published by BLS)
+    JTU6100JOL: { limit: 24, frequency: 'monthly' },    // Educational Services NAICS 61 (NSA) — summed with JTS6200JOL for Ed+Health total
     JTS3000JOL: { limit: 24, frequency: 'monthly' },    // Manufacturing
     JTS2300JOL: { limit: 24, frequency: 'monthly' },    // Construction
 
@@ -71,7 +72,7 @@ export const SERIES_CONFIG = {
     IMP0015: { limit: 24, frequency: 'monthly' }, // Total US Goods Imports (World) — NSA denominator
     IMPCH: { limit: 24, frequency: 'monthly' },   // China Imports
     IMPCA: { limit: 24, frequency: 'monthly' },   // Canada Imports
-    IMPX: { limit: 24, frequency: 'monthly' },    // Mexico Imports
+    IMPMX: { limit: 24, frequency: 'monthly' },   // Mexico Imports (correct ID; IMPX does not exist)
 
     // ============================================
     // Panel 4: Domestic Expenses (CPI Components)
@@ -122,7 +123,8 @@ export const SECTORS = [
         color: '#f472b6',
         employment: 'USEHS',           // All Employees, Ed & Health Services supersector (NAICS 61+62)
         wages: 'CES6500000011',        // Avg Weekly Earnings, Ed & Health Services supersector (NAICS 61+62)
-        openings: 'JTS6200JOL',        // JOLTS: Healthcare & Social Assistance only (NAICS 62) — JOLTS does not publish combined Ed/Health SA
+        openings: 'JTS6200JOL',        // JOLTS: Healthcare & Social Assistance (NAICS 62, SA)
+        openings2: 'JTU6100JOL',       // JOLTS: Educational Services (NAICS 61, NSA) — summed with openings for full supersector total
         output: 'RVAESHS',             // Real Value Added, Ed Services + Health Care & Social Assistance (series ID unconfirmed — shows -- if unavailable)
     },
     {
@@ -142,7 +144,7 @@ export const SECTORS = [
         color: '#06b6d4',
         employment: 'USINFO',
         wages: 'CES5000000011',
-        openings: 'JTS5100JOL', // SA; if FRED returns no data, fall back to JTU5100JOL (NSA)
+        openings: 'JTU5100JOL', // NSA — BLS does not publish SA JOLTS for Information sector
         output: 'RVAI'                 // Real Value Added, Information
     },
     {

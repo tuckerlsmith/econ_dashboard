@@ -137,13 +137,19 @@ export function calculateSectorMetrics(sector, getSeriesData) {
     const empData = getSeriesData(sector.employment);
     const wageData = getSeriesData(sector.wages);
     const openingsData = sector.openings ? getSeriesData(sector.openings) : null;
+    const openings2Data = sector.openings2 ? getSeriesData(sector.openings2) : null;
     const outputData = sector.output ? getSeriesData(sector.output) : null;
 
     // Current values
     const employment = empData?.observations?.[0]?.value ?? null;
     const rawWages = wageData?.observations?.[0]?.value ?? null;
     const wages = rawWages !== null ? rawWages * 52.14 : null;
-    const openings = openingsData?.observations?.[0]?.value ?? null;
+    const openingsPrimary = openingsData?.observations?.[0]?.value ?? null;
+    const openingsSecondary = openings2Data?.observations?.[0]?.value ?? null;
+    // Sum primary + secondary openings if both available (e.g. NAICS 62 + NAICS 61 for Ed/Health)
+    const openings = openingsPrimary !== null
+        ? openingsPrimary + (openingsSecondary ?? 0)
+        : null;
     const output = outputData?.observations?.[0]?.value ?? null;
 
     // YoY changes (output is quarterly — use 4 periods per year)

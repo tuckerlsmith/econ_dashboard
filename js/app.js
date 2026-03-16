@@ -596,7 +596,7 @@ function renderPanel3() {
         if (!existingNote) {
             const note = document.createElement('p');
             note.className = 'sector-footnote';
-            note.textContent = '* Openings: Healthcare & Social Assistance (NAICS 62) only — JOLTS does not publish a combined Education & Health SA series.';
+            note.textContent = '* Openings: Healthcare & Social Assistance SA (NAICS 62) + Educational Services NSA (NAICS 61) — no combined SA series published.';
             summary.prepend(note);
         }
     }

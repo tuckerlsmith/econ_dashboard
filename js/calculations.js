@@ -259,7 +259,7 @@ export function calculateImportShares(getSeriesData) {
     const totalData = getSeriesData('IMP0015');
     const chinaData = getSeriesData('IMPCH');
     const canadaData = getSeriesData('IMPCA');
-    const mexicoData = getSeriesData('IMPX');
+    const mexicoData = getSeriesData('IMPMX');
 
     // Need at least 12 observations for a trailing 12-month sum
     const series = [totalData, chinaData, canadaData, mexicoData];
