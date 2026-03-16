@@ -44,6 +44,13 @@ import {
     renderSettingsForm as renderSettingsFormFromModule
 } from './settings.js';
 
+import {
+    showExplainer,
+    hideExplainer,
+    renderBondExplainerTab,
+    renderEnergyExplainerTab
+} from './explainers.js';
+
 // ============================================
 // Event Bus - Pub/Sub Pattern
 // ============================================
@@ -303,6 +310,7 @@ function renderAllPanels() {
     renderPanel3();
     renderPanel4();
     renderPanel5();
+    renderExplainerTabs();
 }
 
 function renderPanel1() {
@@ -1045,8 +1053,15 @@ function initEventListeners() {
         icon.addEventListener('click', (e) => {
             e.stopPropagation();
             const explainerId = icon.dataset.explainer;
-            showExplainer(explainerId, icon);
+            handleExplainerClick(explainerId, icon);
         });
+    });
+
+    // Close explainers on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideExplainer();
+        }
     });
 }
 
@@ -1125,20 +1140,24 @@ function updateGroupSummary(groupId) {
 }
 
 // ============================================
-// Explainer System (Placeholder)
+// Explainer System
 // ============================================
 
-function showExplainer(explainerId, triggerElement) {
-    // Will be fully implemented in explainers.js
-    console.log('Explainer requested:', explainerId);
+function handleExplainerClick(explainerId, triggerElement) {
+    showExplainer(explainerId, triggerElement, AppState.ui.isMobile);
+}
 
-    // For now, just log - full implementation in Phase 7
-    if (AppState.ui.isMobile) {
-        // Would show bottom sheet
-        alert(`Explainer: ${explainerId}\n\nFull implementation coming in Phase 7.`);
-    } else {
-        // Would show tooltip
-        alert(`Explainer: ${explainerId}\n\nFull implementation coming in Phase 7.`);
+function renderExplainerTabs() {
+    // Bond Explainer tab
+    const bondContainer = document.getElementById('bond-explainer-content');
+    if (bondContainer) {
+        renderBondExplainerTab(bondContainer);
+    }
+
+    // Energy Explainer tab
+    const energyContainer = document.getElementById('energy-explainer-content');
+    if (energyContainer) {
+        renderEnergyExplainerTab(energyContainer);
     }
 }
 
