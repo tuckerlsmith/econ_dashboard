@@ -140,7 +140,8 @@ export function calculateSectorMetrics(sector, getSeriesData) {
 
     // Current values
     const employment = empData?.observations?.[0]?.value ?? null;
-    const wages = wageData?.observations?.[0]?.value ?? null;
+    const rawWages = wageData?.observations?.[0]?.value ?? null;
+    const wages = rawWages !== null ? rawWages * 52.14 : null;
     const openings = openingsData?.observations?.[0]?.value ?? null;
     const output = outputData?.observations?.[0]?.value ?? null;
 

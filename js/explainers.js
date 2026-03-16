@@ -129,8 +129,8 @@ YoY change indicates sector growth/contraction trend.`,
     },
 
     'wages': {
-        title: 'Average Weekly Earnings',
-        content: `Average weekly earnings for all employees in the sector. Combines hourly wages and hours worked.
+        title: 'Average Annual Earnings',
+        content: `Average annual earnings for all employees in the sector (weekly earnings × 52.14 weeks). Combines hourly wages and hours worked.
 
 YoY change indicates wage pressure — high growth may signal labor shortages or inflation pressure.`,
         framework: 'Wage growth outpacing productivity = cost pathology signal.'
@@ -609,7 +609,15 @@ export function renderBondExplainerTab(container) {
         `;
     }).join('');
 
-    container.innerHTML = `<div class="explainer-content">${html}</div>`;
+    const watchlistBar = `
+        <div class="watchlist-bar">
+            <span class="watchlist-bar-label">Watchlists</span>
+            <a class="watchlist-link" href="https://www.investing.com/portfolio/?portfolioID=MDJmNmYwMmxjM2xlZzI5Pw%3D%3D" target="_blank" rel="noopener noreferrer">CDS Watchlist</a>
+            <a class="watchlist-link" href="https://www.investing.com/portfolio/?portfolioID=NzU2ZjRiN2llNTszbj02NA%3D%3D" target="_blank" rel="noopener noreferrer">Bond Watchlist</a>
+        </div>
+    `;
+
+    container.innerHTML = `<div class="explainer-content">${html}${watchlistBar}</div>`;
 
     // Add toggle handlers
     container.querySelectorAll('.explainer-section-header').forEach(header => {
@@ -646,7 +654,14 @@ export function renderEnergyExplainerTab(container) {
         </div>
     `).join('');
 
-    container.innerHTML = `<div class="explainer-content">${html}</div>`;
+    const watchlistBar = `
+        <div class="watchlist-bar">
+            <span class="watchlist-bar-label">Watchlists</span>
+            <a class="watchlist-link" href="https://www.investing.com/portfolio/?portfolioID=NTc0ZGA2Yz0wYDw0ZzJkZA%3D%3D" target="_blank" rel="noopener noreferrer">Energy Watchlist</a>
+        </div>
+    `;
+
+    container.innerHTML = `<div class="explainer-content">${html}${watchlistBar}</div>`;
 
     // Add toggle handlers
     container.querySelectorAll('.explainer-section-header').forEach(header => {

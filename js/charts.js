@@ -32,9 +32,10 @@ const defaultOptions = {
  * @param {string|HTMLCanvasElement} canvasOrId - Canvas element or ID
  * @param {number[]} data - Array of values
  * @param {Object} options - Chart options
+ * @param {string[]} [dates] - Optional date labels for hover tooltips
  * @returns {Chart|null} Chart instance
  */
-export function createSparkline(canvasOrId, data, options = {}) {
+export function createSparkline(canvasOrId, data, options = {}, dates = []) {
     const canvas = typeof canvasOrId === 'string'
         ? document.getElementById(canvasOrId)
         : canvasOrId;
@@ -56,11 +57,14 @@ export function createSparkline(canvasOrId, data, options = {}) {
         fillColor = null,
         showEndpoint = false,
         tension = 0.3,
-        borderWidth = 1.5
+        borderWidth = 1.5,
+        tooltipSuffix = '',
+        tooltipDecimals = 2
     } = options;
 
-    // Generate labels (just indices)
-    const labels = data.map((_, i) => i);
+    // Use date labels if provided, otherwise use numeric indices
+    const labels = dates.length === data.length ? dates : data.map((_, i) => i);
+    const hasDateLabels = dates.length === data.length;
 
     // Determine fill color
     const fill = fillColor ? {
@@ -68,6 +72,34 @@ export function createSparkline(canvasOrId, data, options = {}) {
         above: fillColor,
         below: fillColor
     } : false;
+
+    // Build tooltip config — only enable when date labels are provided
+    const tooltipConfig = hasDateLabels ? {
+        enabled: true,
+        backgroundColor: 'rgba(10, 15, 28, 0.95)',
+        borderColor: 'rgba(58, 69, 96, 0.8)',
+        borderWidth: 1,
+        titleColor: '#94a3b8',
+        bodyColor: '#e2e8f0',
+        titleFont: { family: "'JetBrains Mono', monospace", size: 10 },
+        bodyFont: { family: "'JetBrains Mono', monospace", size: 12, weight: '600' },
+        padding: 8,
+        displayColors: false,
+        callbacks: {
+            title: (items) => {
+                const date = items[0]?.label;
+                if (!date) return '';
+                // Format YYYY-MM-DD → "Jan 2025" or "Jan 15, 2025"
+                const d = new Date(date + 'T00:00:00');
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            },
+            label: (item) => {
+                const val = item.raw;
+                if (val === null || val === undefined) return '--';
+                return `${parseFloat(val).toFixed(tooltipDecimals)}${tooltipSuffix}`;
+            }
+        }
+    } : { enabled: false };
 
     const config = {
         type: 'line',
@@ -86,6 +118,14 @@ export function createSparkline(canvasOrId, data, options = {}) {
         },
         options: {
             ...defaultOptions,
+            plugins: {
+                legend: { display: false },
+                tooltip: tooltipConfig
+            },
+            interaction: hasDateLabels ? {
+                mode: 'index',
+                intersect: false
+            } : undefined,
             ...options.chartOptions
         }
     };

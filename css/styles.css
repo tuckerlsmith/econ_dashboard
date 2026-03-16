@@ -2023,6 +2023,53 @@ a:hover {
     /* Group B and C collapsed by default handled in JS */
 }
 
+/* Watchlist link bar */
+.watchlist-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0 var(--space-md);
+    border-top: 1px solid var(--border);
+    margin-top: var(--space-md);
+}
+
+.watchlist-bar-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    align-self: center;
+    margin-right: var(--space-xs);
+}
+
+.watchlist-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.watchlist-link::after {
+    content: '↗';
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.watchlist-link:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
 /* Very small screens */
 @media (max-width: 480px) {
     .metric-card {

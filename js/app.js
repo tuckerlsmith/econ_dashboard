@@ -18,7 +18,8 @@ import {
     clearCache,
     getLatestValue,
     getChange,
-    getSparklineData
+    getSparklineData,
+    getSparklineDates
 } from './fred.js';
 
 import { SERIES_CONFIG, REGIMES, THRESHOLDS, COUNTRIES, CURRENCIES, SECTORS } from './config.js';
@@ -293,9 +294,22 @@ function calculateRegimeFromData() {
     updateState('regime.correlationHistory', result.correlationHistory);
     updateState('regime.correlationDates', result.dates);
 
-    // Calculate duration (how long in current regime)
-    // For now, just set to 0 - would need historical tracking for accurate duration
-    updateState('regime.duration', 0);
+    // Track regime duration using localStorage persistence
+    const REGIME_KEY = 'dashboard_regime_start';
+    const stored = JSON.parse(localStorage.getItem(REGIME_KEY) || '{}');
+    const newRegime = result.regime;
+
+    if (stored.regime !== newRegime) {
+        // Regime changed — reset start date
+        localStorage.setItem(REGIME_KEY, JSON.stringify({ regime: newRegime, startDate: new Date().toISOString() }));
+        updateState('regime.duration', 0);
+    } else if (stored.startDate) {
+        // Same regime — compute elapsed days
+        const elapsed = Math.floor((Date.now() - new Date(stored.startDate).getTime()) / 86400000);
+        updateState('regime.duration', elapsed);
+    } else {
+        updateState('regime.duration', 0);
+    }
 
     console.log('Regime calculated:', result.regime, 'Correlation:', result.correlation?.toFixed(3));
 }
@@ -319,12 +333,16 @@ function renderPanel1() {
     const regime = AppState.regime.current;
     const regimeConfig = REGIMES[regime] || REGIMES.indeterminate;
 
-    regimeBadge.className = `regime-badge regime-${regime}`;
+    const duration = AppState.regime.duration;
+    const sustainedClass = regime == 2
+        ? duration >= 30 ? 'sustained-30' : duration >= 5 ? 'sustained-5' : ''
+        : '';
+    regimeBadge.className = `regime-badge regime-${regime}${sustainedClass ? ' ' + sustainedClass : ''}`;
     regimeBadge.querySelector('.regime-number').textContent =
         regime === 'indeterminate' ? '?' : regime;
     regimeBadge.querySelector('.regime-name').textContent = regimeConfig.name;
     regimeBadge.querySelector('.regime-duration').textContent =
-        AppState.regime.duration > 0 ? `${AppState.regime.duration} days` : '';
+        duration > 0 ? `${duration} days` : '';
 
     // Metric cards
     renderMetricCard('dgs10', 'DGS10', { suffix: '%', decimals: 2 });
@@ -387,7 +405,7 @@ function renderMetricSparklines() {
     if (yieldData) {
         const sparklineData = getSparklineData(yieldData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-dgs10', sparklineData, { color: '#22c55e', showEndpoint: true });
+            createSparkline('spark-dgs10', sparklineData, { color: '#22c55e', showEndpoint: true, tooltipSuffix: '%', tooltipDecimals: 2 }, getSparklineDates(yieldData, 90));
         }
     }
 
@@ -396,7 +414,7 @@ function renderMetricSparklines() {
     if (dollarData) {
         const sparklineData = getSparklineData(dollarData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-dxy', sparklineData, { color: '#f59e0b', showEndpoint: true });
+            createSparkline('spark-dxy', sparklineData, { color: '#f59e0b', showEndpoint: true, tooltipDecimals: 2 }, getSparklineDates(dollarData, 90));
         }
     }
 
@@ -405,7 +423,7 @@ function renderMetricSparklines() {
     if (forwardData) {
         const sparklineData = getSparklineData(forwardData, 90);
         if (sparklineData.length > 0) {
-            createSparkline('spark-5y5y', sparklineData, { color: '#8b5cf6', showEndpoint: true });
+            createSparkline('spark-5y5y', sparklineData, { color: '#8b5cf6', showEndpoint: true, tooltipSuffix: '%', tooltipDecimals: 2 }, getSparklineDates(forwardData, 90));
         }
     }
 }
@@ -484,8 +502,10 @@ function renderPanel2Sparklines() {
         if (sparklineData.length > 0) {
             createSparkline('spark-hy-oas', sparklineData, {
                 color: '#ef4444',
-                showEndpoint: true
-            });
+                showEndpoint: true,
+                tooltipSuffix: ' bps',
+                tooltipDecimals: 0
+            }, getSparklineDates(hyOasData, 90));
         }
     }
 
@@ -499,8 +519,10 @@ function renderPanel2Sparklines() {
             const color = currentValue < 0 ? '#ef4444' : '#22c55e';
             createSparkline('spark-yield-curve', sparklineData, {
                 color,
-                showEndpoint: true
-            });
+                showEndpoint: true,
+                tooltipSuffix: ' bps',
+                tooltipDecimals: 0
+            }, getSparklineDates(yieldCurveData, 365));
         }
     }
 
@@ -599,25 +621,30 @@ function renderCPICard(id, seriesId, label) {
 
     // Create sparkline of YoY% over 24 months
     const sparklineYoY = [];
+    const sparklineDates = [];
     for (let i = 0; i < Math.min(24, data.observations.length - 12); i++) {
         const curr = data.observations[i].value;
         const prev = data.observations[i + 12]?.value;
         if (curr && prev) {
             sparklineYoY.push(((curr - prev) / prev) * 100);
+            sparklineDates.push(data.observations[i].date);
         }
     }
 
     if (sparklineYoY.length > 0) {
         // Reverse to get chronological order (oldest first)
         const sparkData = sparklineYoY.reverse();
+        const sparkDates = sparklineDates.reverse();
 
         // Color based on current trend
         const color = yoy > 3 ? '#ef4444' : yoy < 2 ? '#22c55e' : '#f59e0b';
 
         createSparkline(`spark-${id}`, sparkData, {
             color,
-            showEndpoint: true
-        });
+            showEndpoint: true,
+            tooltipSuffix: '% YoY',
+            tooltipDecimals: 1
+        }, sparkDates);
     }
 }
 
@@ -730,8 +757,9 @@ function renderCurrenciesTable() {
             if (sparklineData.length > 0) {
                 createSparkline(`spark-fx-${index}`, sparklineData, {
                     color: '#3b82f6',
-                    showEndpoint: true
-                });
+                    showEndpoint: true,
+                    tooltipDecimals: 4
+                }, getSparklineDates(data, 90));
             }
         }
     });

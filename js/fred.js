@@ -291,6 +291,20 @@ export function getSparklineData(seriesData, count = 90) {
 }
 
 /**
+ * Gets an array of dates corresponding to getSparklineData output
+ * @param {Object} seriesData - Series data object
+ * @param {number} count - Number of values to get (must match getSparklineData count)
+ * @returns {string[]} Array of date strings (oldest first)
+ */
+export function getSparklineDates(seriesData, count = 90) {
+    if (!seriesData || !seriesData.observations) return [];
+    return seriesData.observations
+        .slice(0, count)
+        .map(o => o.date)
+        .reverse();
+}
+
+/**
  * Gets a value from N periods ago
  * @param {Object} seriesData - Series data object
  * @param {number} periods - Number of periods back
