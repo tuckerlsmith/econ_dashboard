@@ -1871,6 +1871,31 @@ a:hover {
         font-size: 11px;
     }
 
+    /* Horizontal scroll matrix with sticky first column */
+    .matrix-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 calc(-1 * var(--space-md));
+        padding: 0 var(--space-md);
+    }
+
+    .matrix {
+        min-width: 600px;
+    }
+
+    .matrix th:first-child,
+    .matrix td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--bg-panel);
+        z-index: 1;
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .matrix thead th:first-child {
+        background: var(--bg-cell);
+    }
+
     .panel-tabs {
         flex-wrap: wrap;
     }
@@ -1904,10 +1929,53 @@ a:hover {
         display: none;
     }
 
-    /* Touch targets */
+    /* Touch targets - 44px minimum */
     .info-icon {
         min-width: 44px;
         min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-icon {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .group-header {
+        min-height: 48px;
+        padding: var(--space-md);
+    }
+
+    .panel-tab {
+        min-height: 44px;
+    }
+
+    .explainer-section-header {
+        min-height: 48px;
+    }
+
+    /* Collapsed group summary styling */
+    .panel-group.collapsed .group-summary {
+        display: block;
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-left: auto;
+        text-align: right;
+        max-width: 60%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Bottom bar mobile compact */
+    .bottom-metric .label {
+        font-size: 9px;
+    }
+
+    .bottom-metric .arrow {
+        font-size: 10px;
     }
 
     /* Group B and C collapsed by default handled in JS */

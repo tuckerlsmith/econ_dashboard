@@ -501,6 +501,55 @@ function showBottomSheet(explainer) {
     sheet.querySelector('.bottom-sheet-close').addEventListener('click', hideExplainer);
     sheet.querySelector('.bottom-sheet-overlay').addEventListener('click', hideExplainer);
 
+    // Swipe-to-dismiss handling
+    const content = sheet.querySelector('.bottom-sheet-content');
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    content.addEventListener('touchstart', (e) => {
+        // Only start drag from handle or header area
+        const touch = e.touches[0];
+        const rect = content.getBoundingClientRect();
+        const touchY = touch.clientY - rect.top;
+
+        // Allow drag from top 60px (handle + header area)
+        if (touchY < 60) {
+            startY = touch.clientY;
+            isDragging = true;
+            content.style.transition = 'none';
+        }
+    }, { passive: true });
+
+    content.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+
+        // Only allow dragging down
+        if (deltaY > 0) {
+            content.style.transform = `translateY(${deltaY}px)`;
+        }
+    }, { passive: true });
+
+    content.addEventListener('touchend', () => {
+        if (!isDragging) return;
+
+        isDragging = false;
+        content.style.transition = '';
+
+        const deltaY = currentY - startY;
+
+        // If dragged more than 100px down, dismiss
+        if (deltaY > 100) {
+            hideExplainer();
+        } else {
+            // Snap back
+            content.style.transform = '';
+        }
+    });
+
     activeBottomSheet = sheet;
 }
 
