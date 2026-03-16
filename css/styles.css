@@ -1337,6 +1337,14 @@ a:hover {
     color: var(--text-primary);
 }
 
+.bottom-metric.threshold-green .value { color: var(--green); }
+.bottom-metric.threshold-amber .value { color: var(--amber); }
+.bottom-metric.threshold-red .value   { color: var(--red); }
+.bottom-metric.threshold-critical .value {
+    color: var(--red);
+    animation: pulse-value 1s infinite;
+}
+
 .bottom-metric .arrow {
     font-size: 10px;
 }
